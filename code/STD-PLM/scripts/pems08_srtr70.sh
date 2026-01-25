@@ -1,6 +1,6 @@
 
 python main.py \
-    --data_path '../../../data/traffic/miss_data/PEMS08/true_data_SR-TR_0.7_v2.npz' \
+    --data_path '../../../data/traffic/miss_data/PEMS08/true_data_SR-TR_0.7_v3.npz' \
     --adj_filename ../../../data/traffic/PEMS08/PEMS08.csv \
     --dataset PEMS08MISSING \
     --desc PEMS08_IM_SRTR_70\
