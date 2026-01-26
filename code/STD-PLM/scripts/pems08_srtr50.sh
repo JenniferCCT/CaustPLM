@@ -1,9 +1,9 @@
 
 python main.py \
-    --data_path '../../../data/traffic/miss_data/PEMS08/true_data_SR-TR_0.3_v1.npz' \
+    --data_path '../../../data/traffic/miss_data/PEMS08/true_data_SR-TR_0.5_v1.npz' \
     --adj_filename ../../../data/traffic/PEMS08/PEMS08.csv \
     --dataset PEMS08MISSING \
-    --desc PEMS08_IM_SRTR_30\
+    --desc PEMS08_IM_SRTR_50\
     --sample_len 12 \
     --predict_len 12 \
     --train_ratio 0.6 \
