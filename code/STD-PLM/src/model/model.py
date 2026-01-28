@@ -6,6 +6,7 @@ from utils.utils import norm_Adj, lap_eig, topological_sort
 from model.sandglassAttn import SAG
 import numpy as np
 from model.position import PositionalEncoding
+from model.basic import PromptPoolPrefix
 
 
 class DecodingLayer(nn.Module):
@@ -195,7 +196,9 @@ class STALLM(nn.Module):
                   node_emb_dim , sag_dim, sag_tokens, \
                  adj_mx = None, dis_mx = None , use_node_embedding = True,\
                  use_timetoken = True, use_sandglassAttn = True, \
-                 dropout = 0, trunc_k = 16, t_dim = 64,wo_conloss=False):
+                 dropout = 0, trunc_k = 16, t_dim = 64,wo_conloss=False,\
+                 prompt_pool: bool = False,pool_size: int = 30,top_k: int = 3, \
+                 prompt_len: int = 5,prompt_sim_lambda: float = 1e-3):
         super().__init__()
 
         self.topological_sort_node = True
@@ -214,6 +217,15 @@ class STALLM(nn.Module):
         self.output_len = output_len
         self.sag_tokens = sag_tokens
 
+        self.use_prompt_pool = prompt_pool
+        self.prompt_sim_lambda = prompt_sim_lambda
+        if self.use_prompt_pool:
+            self.prompt_pool = PromptPoolPrefix(
+                emb_dim=self.emb_dim,
+                pool_size=pool_size,
+                top_k=top_k,
+                prompt_len=prompt_len
+            )
 
         self.use_sandglassAttn = use_sandglassAttn
         if use_sandglassAttn:
@@ -284,11 +296,25 @@ class STALLM(nn.Module):
             time_tokens_idx = st_embedding.shape[1]
             st_embedding = torch.concat([time_tokens,st_embedding],dim=1)
 
-        if prompt_prefix is not None:
-            prompt_len,_ = prompt_prefix.shape
-            prompt_embedding = self.basemodel.getembedding(prompt_prefix).view(1,prompt_len,-1)
-            prompt_embedding = prompt_embedding.repeat(B,1,1)
-            st_embedding = torch.concat([prompt_embedding,st_embedding],dim=1)
+        # if prompt_prefix is not None:
+        #     prompt_len,_ = prompt_prefix.shape
+        #     prompt_embedding = self.basemodel.getembedding(prompt_prefix).view(1,prompt_len,-1)
+        #     prompt_embedding = prompt_embedding.repeat(B,1,1)
+        #     st_embedding = torch.concat([prompt_embedding,st_embedding],dim=1)
+
+        if self.use_prompt_pool:
+            query = st_embedding.mean(dim=1)   # (B, D)
+            prompt_tokens, sim_loss, _ = self.prompt_pool(query)
+            st_embedding = torch.cat([prompt_tokens, st_embedding], dim=1)
+            other_loss.append(self.prompt_sim_lambda * sim_loss)
+        else:
+            # keep old behavior if you still want ablation with prompt_prefix
+            if prompt_prefix is not None:
+                prompt_len,_ = prompt_prefix.shape
+                prompt_embedding = self.basemodel.getembedding(prompt_prefix).view(1,prompt_len,-1)
+                prompt_embedding = prompt_embedding.repeat(B,1,1)
+                st_embedding = torch.concat([prompt_embedding,st_embedding],dim=1)
+
 
         hidden_state = st_embedding
 

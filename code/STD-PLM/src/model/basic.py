@@ -104,6 +104,56 @@ class Prompt_pool(nn.Module):
         sim_loss = (hidden_states_norm.unsqueeze(2)*key_pool_norm_topk).sum()/B
 
         return out,sim_loss
+
+class PromptPoolPrefix(nn.Module):
+    """
+    TEMPO-style prompt pool for prefix injection.
+
+    Given a query embedding per instance, retrieve top-k prompts from a pool,
+    then concatenate them as prefix tokens (soft prompts).
+
+    Returns:
+      prompt_tokens: (B, top_k * prompt_len, D)
+      sim_loss: scalar (optional regularization)
+      indices: (B, top_k) selected prompt ids
+    """
+    def __init__(self, emb_dim: int, pool_size: int = 30, top_k: int = 3, prompt_len: int = 5):
+        super().__init__()
+        self.emb_dim = emb_dim
+        self.pool_size = pool_size
+        self.top_k = top_k
+        self.prompt_len = prompt_len
+
+        # keys: (M, D), values: (M, Lp, D)
+        self.key_pool = nn.Parameter(torch.randn(pool_size, emb_dim))
+        self.value_pool = nn.Parameter(torch.randn(pool_size, prompt_len, emb_dim))
+
+    @staticmethod
+    def l2_normalize(x, dim=-1, eps=1e-12):
+        return x / (x.norm(p=2, dim=dim, keepdim=True).clamp_min(eps))
+
+    def forward(self, query: torch.Tensor):
+        """
+        query: (B, D)  instance-wise query embedding
+        """
+        B, D = query.shape
+        assert D == self.emb_dim, f"query dim {D} != emb_dim {self.emb_dim}"
+
+        q = self.l2_normalize(query, dim=-1)               # (B, D)
+        k = self.l2_normalize(self.key_pool, dim=-1)       # (M, D)
+
+        sim = q @ k.t()                                    # (B, M)
+        _, idx = torch.topk(sim, k=self.top_k, dim=-1)     # (B, K)
+
+        # gather prompts: (B, K, Lp, D) -> (B, K*Lp, D)
+        prompts = self.value_pool[idx]                     # (B, K, Lp, D)
+        prompt_tokens = prompts.reshape(B, self.top_k * self.prompt_len, D)
+
+        # optional similarity regularization (encourage query ~ selected keys)
+        selected_keys = k[idx]                             # (B, K, D)
+        sim_loss = (q.unsqueeze(1) * selected_keys).sum(dim=-1).mean()  # scalar
+
+        return prompt_tokens, sim_loss, idx
     
 
 class ScaleDotProductAttention(nn.Module):

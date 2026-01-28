@@ -304,7 +304,8 @@ if __name__ == '__main__':
                     sag_dim = args.sag_dim, sag_tokens = args.sag_tokens, \
                      adj_mx = adj_mx, dis_mx = distance_mx, \
                     use_node_embedding = args.node_embedding ,use_timetoken= args.time_token, \
-                    use_sandglassAttn = args.sandglassAttn, dropout = args.dropout, trunc_k = args.trunc_k, t_dim = args.t_dim,wo_conloss=args.wo_conloss).cuda()
+                    use_sandglassAttn = args.sandglassAttn, dropout = args.dropout, trunc_k = args.trunc_k, t_dim = args.t_dim,wo_conloss=args.wo_conloss, \
+                    prompt_pool=args.prompt_pool).cuda()
     
     if not args.from_pretrained_model is None:
         model.load(args.from_pretrained_model)
