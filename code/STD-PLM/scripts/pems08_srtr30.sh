@@ -34,4 +34,4 @@ python main.py \
     --sag_tokens 128 \
     --input_dim 1\
     --output_dim 1 \
-    --prompt_pool
+    --prompt_prefix

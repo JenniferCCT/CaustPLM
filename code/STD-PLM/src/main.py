@@ -277,14 +277,31 @@ if __name__ == '__main__':
     #distance_mx = cal_shortest_path_length(adj_mx, distance_mx)
 
     prompt_prefix = None
-    if not args.prompt_prefix is None:
-        prompt_prefix = args.prompt_prefix
+    # if not args.prompt_prefix is None:
+    #     prompt_prefix = args.prompt_prefix
 
+    #     tokenizer = basemodel.gettokenizer()
+
+    #     prompt_prefix = tokenizer(prompt_prefix, 
+    #                     return_tensors="pt", return_attention_mask=False)
+    #     prompt_prefix = prompt_prefix['input_ids'].cuda().view(-1,1)#[:-1,:]
+
+    if args.prompt_prefix:
         tokenizer = basemodel.gettokenizer()
 
-        prompt_prefix = tokenizer(prompt_prefix, 
-                        return_tensors="pt", return_attention_mask=False)
-        prompt_prefix = prompt_prefix['input_ids'].cuda().view(-1,1)#[:-1,:]
+        prompt_text = (
+            "<|start_prompt|>"
+            f"The dataset is a real-world traffic sensor dataset collected from the PEMS08 road network. "
+            f"Each row represents a traffic sensor, and each sensor has a time series length of {args.sample_len}. "
+            f"Some values in the dataset are missing, and the missing values are marked as 0. "
+            "#Instruction:# "
+            "The task is to learn temporal dependencies within each sensor and spatial correlations across sensors "
+            "to infer and fill in the missing traffic values. "
+            "Finally, only return the completed dataset after filling in the missing values."
+        )
+
+        tok = tokenizer(prompt_text, return_tensors="pt", return_attention_mask=False)
+        prompt_prefix = tok["input_ids"].cuda().view(-1,1)  
 
 
     LOG_DIR = os.path.join(args.log_root,f'{get_time_str()}_{args.desc}_{random_str()}')
@@ -305,7 +322,7 @@ if __name__ == '__main__':
                      adj_mx = adj_mx, dis_mx = distance_mx, \
                     use_node_embedding = args.node_embedding ,use_timetoken= args.time_token, \
                     use_sandglassAttn = args.sandglassAttn, dropout = args.dropout, trunc_k = args.trunc_k, t_dim = args.t_dim,wo_conloss=args.wo_conloss, \
-                    prompt_pool=args.prompt_pool).cuda()
+                    prompt_pool=args.prompt_pool, cross_attn=args.cross_attn).cuda()
     
     if not args.from_pretrained_model is None:
         model.load(args.from_pretrained_model)

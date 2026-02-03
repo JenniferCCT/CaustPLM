@@ -6,13 +6,13 @@ def AddModelArgs(parser):
 
     parser.add_argument("--prompt_pool",action="store_true")
 
+    parser.add_argument("--cross_attn" ,action="store_true")
+
     parser.add_argument("--ln_grad",action="store_true", help="whether to calculate gradient of LayerNorm ")
 
-    parser.add_argument("--causal", default=0, type=int,
-                            help="LLM causal attention")
+    parser.add_argument("--causal", default=0, type=int, help="LLM causal attention")
     
-    parser.add_argument("--prompt_prefix", default=None ,type=str, help="whether use prompt or not")
-
+    parser.add_argument("--prompt_prefix", action="store_true", help="whether use prompt or not")
 
     parser.add_argument("--node_embedding", action="store_true")
 
