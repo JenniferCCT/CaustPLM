@@ -189,6 +189,31 @@ class Node2Token(nn.Module):
 
         return out
 
+class SCALiteQueryGate(nn.Module):
+    """
+    Query-aware SCA-lite gate.
+    beta_i = sigmoid(MLP([token_i || query]))
+    token_i: (B, N, D)
+    query:   (B, D)
+    beta:    (B, N, 1)
+    """
+    def __init__(self, emb_dim: int, hidden_mult: float = 0.5):
+        super().__init__()
+        hidden = max(32, int(emb_dim * hidden_mult))
+        self.mlp = nn.Sequential(
+            nn.Linear(emb_dim * 2, hidden),
+            nn.ReLU(),
+            nn.Linear(hidden, 1),
+        )
+
+    def forward(self, node_tokens: torch.Tensor, query: torch.Tensor) -> torch.Tensor:
+        B, N, D = node_tokens.shape
+        q = query.unsqueeze(1).expand(B, N, D)          # (B, N, D)
+        x = torch.cat([node_tokens, q], dim=-1)         # (B, N, 2D)
+        beta = torch.sigmoid(self.mlp(x))               # (B, N, 1)
+        return beta
+
+
 
 class STALLM(nn.Module):
     def __init__(self,basemodel,sample_len, output_len,\
@@ -238,6 +263,12 @@ class STALLM(nn.Module):
         self.layer_norm4 = nn.LayerNorm(self.emb_dim)  # for T->S
         self.layer_norm5 = nn.LayerNorm(self.emb_dim)
 
+        self.prompt_proj = nn.Sequential(nn.Linear(self.emb_dim, self.emb_dim))
+
+        self.use_sca_lite = True
+        self.sca_eps = 0.2
+        self.gate_lambda = 1e-3   # 可選：讓 gate 稍微稀疏
+        self.sca_lite_gate = SCALiteQueryGate(self.emb_dim, hidden_mult=0.5)
 
         self.use_sandglassAttn = use_sandglassAttn
         if use_sandglassAttn:
@@ -372,6 +403,18 @@ class STALLM(nn.Module):
             spatial_token = spatial_token[:, self.node_order, :] # (B, N, D)
 
         spatial_tokens = spatial_token                           # (B, Ts, D)  Ts=N initially
+
+        if self.use_sca_lite:
+            # query 可以用「目前所有 node token 的平均」：全局狀態摘要
+            q = spatial_tokens.mean(dim=1)  # (B, D)
+
+            beta = self.sca_lite_gate(spatial_tokens, q)         # (B, N, 1)
+            spatial_tokens = self.apply_residual_gate(spatial_tokens, beta, eps=self.sca_eps)
+
+            # (Optional) sparsity regularization: encourage smaller beta (sparser influence)
+            if getattr(self, "gate_lambda", 0.0) > 0:
+                other_loss.append(self.gate_lambda * beta.mean())
+
         s_num = N
 
         # optional SAG compression
@@ -456,6 +499,7 @@ class STALLM(nn.Module):
                 prompt_len, _ = prompt_prefix.shape
                 prompt_embedding = self.basemodel.getembedding(prompt_prefix).view(1, prompt_len, -1)
                 prompt_embedding = prompt_embedding.repeat(B, 1, 1)
+                # prompt_embedding = self.prompt_proj(prompt_embedding)
                 st_embedding = torch.cat([prompt_embedding, st_embedding], dim=1)
 
         # -------------------------
@@ -514,6 +558,11 @@ class STALLM(nn.Module):
         N = self.adj_mx.shape[0]
         self.alpha = torch.tensor([1.05] * N).cuda() + torch.softmax(self.d_mx,dim=0)*5 
         self.node_order,self.node_order_rev = topological_sort(adj_mx)
+
+    @staticmethod
+    def apply_residual_gate(tokens: torch.Tensor, beta: torch.Tensor, eps: float = 0.2):
+        scale = eps + (1.0 - eps) * beta
+        return tokens * scale
 
 
 # if __name__ == "__main__":

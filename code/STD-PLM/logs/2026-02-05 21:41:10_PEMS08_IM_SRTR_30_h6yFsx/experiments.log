@@ -1,0 +1,849 @@
+2026-02-05 21:41:10,781 - Experiment - INFO - Namespace(desc='PEMS08_IM_SRTR_30', log_root='../logs', from_pretrained_model=None, zero_shot=False, nni=False, save_result=False, few_shot=1, node_shuffle_seed=None, trainset_dynamic_missing=True, task='imputation', target_strategy='hybrid', dataset='PEMS08MISSING', data_path='../../../data/traffic/miss_data/PEMS08/true_data_SR-TR_0.3_v1.npz', adj_filename='../../../data/traffic/PEMS08/PEMS08.csv', sample_len=12, predict_len=12, train_ratio=0.6, val_ratio=0.2, input_dim=1, output_dim=1, lora=True, prompt_pool=False, cross_attn=False, ln_grad=True, causal=0, prompt_prefix=True, node_embedding=True, time_token=True, model='gpt2', llm_layers=3, dropout=0.05, trunc_k=64, t_dim=64, node_emb_dim=64, sandglassAttn=True, wo_conloss=False, sag_dim=128, sag_tokens=128, lr=0.001, lr_decay=0.99, weight_decay=0.0, batch_size=64, epoch=500, val_epoch=1, test_epoch=5, patience=50)
+2026-02-05 21:41:10,854 - Experiment - INFO - STALLM(
+  (basemodel): GPT2(
+    (llm): GPT2LMHeadModel(
+      (transformer): GPT2Model(
+        (wte): Embedding(50257, 768)
+        (wpe): Embedding(1024, 768)
+        (drop): Dropout(p=0.1, inplace=False)
+        (h): ModuleList(
+          (0-2): 3 x GPT2Block(
+            (ln_1): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (attn): GPT2Attention(
+              (c_attn): lora.Linear(
+                (base_layer): Conv1D(nf=2304, nx=768)
+                (lora_dropout): ModuleDict(
+                  (default): Identity()
+                )
+                (lora_A): ModuleDict(
+                  (default): Linear(in_features=768, out_features=16, bias=False)
+                )
+                (lora_B): ModuleDict(
+                  (default): Linear(in_features=16, out_features=2304, bias=False)
+                )
+                (lora_embedding_A): ParameterDict()
+                (lora_embedding_B): ParameterDict()
+                (lora_magnitude_vector): ModuleDict()
+              )
+              (c_proj): Conv1D(nf=768, nx=768)
+              (attn_dropout): Dropout(p=0.1, inplace=False)
+              (resid_dropout): Dropout(p=0.1, inplace=False)
+            )
+            (ln_2): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (mlp): GPT2MLP(
+              (c_fc): Conv1D(nf=3072, nx=768)
+              (c_proj): Conv1D(nf=768, nx=3072)
+              (act): NewGELUActivation()
+              (dropout): Dropout(p=0.1, inplace=False)
+            )
+          )
+        )
+        (ln_f): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+      )
+      (lm_head): Linear(in_features=768, out_features=50257, bias=False)
+    )
+  )
+  (cross_attn): MultiheadAttention(
+    (out_proj): NonDynamicallyQuantizableLinear(in_features=768, out_features=768, bias=True)
+  )
+  (layer_norm3): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+  (layer_norm4): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+  (layer_norm5): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+  (prompt_proj): Sequential(
+    (0): Linear(in_features=768, out_features=768, bias=True)
+  )
+  (sca_lite_gate): SCALiteQueryGate(
+    (mlp): Sequential(
+      (0): Linear(in_features=1536, out_features=384, bias=True)
+      (1): ReLU()
+      (2): Linear(in_features=384, out_features=1, bias=True)
+    )
+  )
+  (sandglassAttn): SAG(
+    (pe): PositionalEncoding(
+      (dropout): Dropout(p=0.05, inplace=False)
+    )
+    (emc_mha): MultiheadAttention(
+      (out_proj): NonDynamicallyQuantizableLinear(in_features=128, out_features=128, bias=True)
+    )
+    (dec_mha): MultiheadAttention(
+      (out_proj): NonDynamicallyQuantizableLinear(in_features=128, out_features=128, bias=True)
+    )
+    (enc_fc): Linear(in_features=128, out_features=768, bias=True)
+    (dec_fc): Linear(in_features=128, out_features=768, bias=True)
+    (x_fc): Linear(in_features=768, out_features=128, bias=True)
+    (en_ln): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+    (de_ln): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+  )
+  (spatialTokenizer): Node2Token(
+    (fc1): Sequential(
+      (0): Linear(in_features=24, out_features=768, bias=True)
+    )
+    (state_fc): Sequential(
+      (0): Linear(in_features=192, out_features=64, bias=True)
+      (1): ReLU()
+      (2): Linear(in_features=64, out_features=768, bias=True)
+    )
+    (mask_token): Linear(in_features=12, out_features=768, bias=True)
+    (ln): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+  )
+  (out_mlp): DecodingLayer(
+    (fc): Sequential(
+      (0): Linear(in_features=768, out_features=520, bias=True)
+      (1): ReLU()
+      (2): Linear(in_features=520, out_features=12, bias=True)
+    )
+  )
+  (timeembedding): TimeEmbedding(
+    (day_embedding): Embedding(288, 64)
+    (week_embedding): Embedding(7, 64)
+  )
+  (node_embd_layer): NodeEmbedding(
+    (fc): Linear(in_features=64, out_features=64, bias=True)
+  )
+  (timeTokenizer): Time2Token(
+    (fc_state): Sequential(
+      (0): Linear(in_features=152, out_features=613, bias=True)
+      (1): ReLU()
+      (2): Linear(in_features=613, out_features=768, bias=True)
+    )
+    (fc_grad): Sequential(
+      (0): Linear(in_features=150, out_features=612, bias=True)
+      (1): ReLU()
+      (2): Linear(in_features=612, out_features=768, bias=True)
+    )
+    (ln): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+  )
+  (layer_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+)
+2026-02-05 21:41:10,856 - Experiment - INFO - total_params:69685009    total_trainable_params:6676622
+2026-02-05 21:41:10,857 - Experiment - INFO - dict_keys(['basemodel.llm.transformer.wpe.weight', 'basemodel.llm.transformer.h.0.ln_1.weight', 'basemodel.llm.transformer.h.0.ln_1.bias', 'basemodel.llm.transformer.h.0.attn.c_attn.lora_A.default.weight', 'basemodel.llm.transformer.h.0.attn.c_attn.lora_B.default.weight', 'basemodel.llm.transformer.h.0.ln_2.weight', 'basemodel.llm.transformer.h.0.ln_2.bias', 'basemodel.llm.transformer.h.1.ln_1.weight', 'basemodel.llm.transformer.h.1.ln_1.bias', 'basemodel.llm.transformer.h.1.attn.c_attn.lora_A.default.weight', 'basemodel.llm.transformer.h.1.attn.c_attn.lora_B.default.weight', 'basemodel.llm.transformer.h.1.ln_2.weight', 'basemodel.llm.transformer.h.1.ln_2.bias', 'basemodel.llm.transformer.h.2.ln_1.weight', 'basemodel.llm.transformer.h.2.ln_1.bias', 'basemodel.llm.transformer.h.2.attn.c_attn.lora_A.default.weight', 'basemodel.llm.transformer.h.2.attn.c_attn.lora_B.default.weight', 'basemodel.llm.transformer.h.2.ln_2.weight', 'basemodel.llm.transformer.h.2.ln_2.bias', 'basemodel.llm.transformer.ln_f.weight', 'basemodel.llm.transformer.ln_f.bias', 'cross_attn.in_proj_weight', 'cross_attn.in_proj_bias', 'cross_attn.out_proj.weight', 'cross_attn.out_proj.bias', 'layer_norm3.weight', 'layer_norm3.bias', 'layer_norm4.weight', 'layer_norm4.bias', 'layer_norm5.weight', 'layer_norm5.bias', 'prompt_proj.0.weight', 'prompt_proj.0.bias', 'sca_lite_gate.mlp.0.weight', 'sca_lite_gate.mlp.0.bias', 'sca_lite_gate.mlp.2.weight', 'sca_lite_gate.mlp.2.bias', 'sandglassAttn.hyper_nodes', 'sandglassAttn.emc_mha.in_proj_weight', 'sandglassAttn.emc_mha.in_proj_bias', 'sandglassAttn.emc_mha.out_proj.weight', 'sandglassAttn.emc_mha.out_proj.bias', 'sandglassAttn.dec_mha.q_proj_weight', 'sandglassAttn.dec_mha.k_proj_weight', 'sandglassAttn.dec_mha.v_proj_weight', 'sandglassAttn.dec_mha.in_proj_bias', 'sandglassAttn.dec_mha.out_proj.weight', 'sandglassAttn.dec_mha.out_proj.bias', 'sandglassAttn.enc_fc.weight', 'sandglassAttn.enc_fc.bias', 'sandglassAttn.dec_fc.weight', 'sandglassAttn.dec_fc.bias', 'sandglassAttn.x_fc.weight', 'sandglassAttn.x_fc.bias', 'sandglassAttn.en_ln.weight', 'sandglassAttn.en_ln.bias', 'sandglassAttn.de_ln.weight', 'sandglassAttn.de_ln.bias', 'spatialTokenizer.fc1.0.weight', 'spatialTokenizer.fc1.0.bias', 'spatialTokenizer.state_fc.0.weight', 'spatialTokenizer.state_fc.0.bias', 'spatialTokenizer.state_fc.2.weight', 'spatialTokenizer.state_fc.2.bias', 'spatialTokenizer.mask_token.weight', 'spatialTokenizer.mask_token.bias', 'spatialTokenizer.ln.weight', 'spatialTokenizer.ln.bias', 'out_mlp.fc.0.weight', 'out_mlp.fc.0.bias', 'out_mlp.fc.2.weight', 'out_mlp.fc.2.bias', 'timeembedding.day_embedding.weight', 'timeembedding.week_embedding.weight', 'node_embd_layer.fc.weight', 'node_embd_layer.fc.bias', 'timeTokenizer.fc_state.0.weight', 'timeTokenizer.fc_state.0.bias', 'timeTokenizer.fc_state.2.weight', 'timeTokenizer.fc_state.2.bias', 'timeTokenizer.fc_grad.0.weight', 'timeTokenizer.fc_grad.0.bias', 'timeTokenizer.fc_grad.2.weight', 'timeTokenizer.fc_grad.2.bias', 'timeTokenizer.ln.weight', 'timeTokenizer.ln.bias', 'layer_norm.weight', 'layer_norm.bias'])
+2026-02-05 21:41:29,359 - Experiment - INFO - epoch 0 train_loss:42.24507980575105
+2026-02-05 21:41:32,787 - Experiment - INFO - [Validation] epoch 0 val_loss:17.39150446111506
+2026-02-05 21:41:36,189 - Experiment - INFO - [Test][imputation] epoch 0 mae:[16.92279815673828] rmse:[25.33377456665039] mape:[0.13625244796276093]
+2026-02-05 21:41:36,189 - Experiment - INFO - [Scheduler] epoch 0 lr:0.001
+2026-02-05 21:41:54,595 - Experiment - INFO - epoch 1 train_loss:33.30824424835022
+2026-02-05 21:41:58,043 - Experiment - INFO - [Validation] epoch 1 val_loss:16.74514779177579
+2026-02-05 21:41:58,043 - Experiment - INFO - [Scheduler] epoch 1 lr:0.001
+2026-02-05 21:42:16,505 - Experiment - INFO - epoch 2 train_loss:29.038867116688255
+2026-02-05 21:42:19,960 - Experiment - INFO - [Validation] epoch 2 val_loss:15.92268690629439
+2026-02-05 21:42:19,960 - Experiment - INFO - [Scheduler] epoch 2 lr:0.001
+2026-02-05 21:42:38,470 - Experiment - INFO - epoch 3 train_loss:26.45971910396736
+2026-02-05 21:42:41,930 - Experiment - INFO - [Validation] epoch 3 val_loss:15.324325769597834
+2026-02-05 21:42:41,930 - Experiment - INFO - [Scheduler] epoch 3 lr:0.001
+2026-02-05 21:43:00,444 - Experiment - INFO - epoch 4 train_loss:24.856391815368287
+2026-02-05 21:43:03,921 - Experiment - INFO - [Validation] epoch 4 val_loss:16.533473257585005
+2026-02-05 21:43:03,921 - Experiment - INFO - [Scheduler] epoch 4 lr:0.001
+2026-02-05 21:43:22,467 - Experiment - INFO - epoch 5 train_loss:23.76606562037668
+2026-02-05 21:43:25,929 - Experiment - INFO - [Validation] epoch 5 val_loss:14.914527979764072
+2026-02-05 21:43:29,367 - Experiment - INFO - [Test][imputation] epoch 5 mae:[14.587427139282227] rmse:[22.230274200439453] mape:[0.10622597485780716]
+2026-02-05 21:43:29,367 - Experiment - INFO - [Scheduler] epoch 5 lr:0.001
+2026-02-05 21:43:47,906 - Experiment - INFO - epoch 6 train_loss:22.82323550606916
+2026-02-05 21:43:51,387 - Experiment - INFO - [Validation] epoch 6 val_loss:15.403604524785822
+2026-02-05 21:43:51,387 - Experiment - INFO - [Scheduler] epoch 6 lr:0.001
+2026-02-05 21:44:09,969 - Experiment - INFO - epoch 7 train_loss:22.3388273616037
+2026-02-05 21:44:13,438 - Experiment - INFO - [Validation] epoch 7 val_loss:14.623677409778942
+2026-02-05 21:44:13,438 - Experiment - INFO - [Scheduler] epoch 7 lr:0.001
+2026-02-05 21:44:32,036 - Experiment - INFO - epoch 8 train_loss:22.27446469289814
+2026-02-05 21:44:35,526 - Experiment - INFO - [Validation] epoch 8 val_loss:15.554443047263405
+2026-02-05 21:44:35,526 - Experiment - INFO - [Scheduler] epoch 8 lr:0.001
+2026-02-05 21:44:54,117 - Experiment - INFO - epoch 9 train_loss:21.574983002896793
+2026-02-05 21:44:57,607 - Experiment - INFO - [Validation] epoch 9 val_loss:14.66498295177113
+2026-02-05 21:44:57,608 - Experiment - INFO - [Scheduler] epoch 9 lr:0.001
+2026-02-05 21:45:16,204 - Experiment - INFO - epoch 10 train_loss:21.12793114941991
+2026-02-05 21:45:19,707 - Experiment - INFO - [Validation] epoch 10 val_loss:14.263555058566007
+2026-02-05 21:45:23,156 - Experiment - INFO - [Test][imputation] epoch 10 mae:[13.944931983947754] rmse:[21.500999450683594] mape:[0.09732421487569809]
+2026-02-05 21:45:23,156 - Experiment - INFO - [Scheduler] epoch 10 lr:0.001
+2026-02-05 21:45:41,790 - Experiment - INFO - epoch 11 train_loss:20.590625854309447
+2026-02-05 21:45:45,292 - Experiment - INFO - [Validation] epoch 11 val_loss:15.230085147510875
+2026-02-05 21:45:45,292 - Experiment - INFO - [Scheduler] epoch 11 lr:0.001
+2026-02-05 21:46:03,929 - Experiment - INFO - epoch 12 train_loss:20.763751024257637
+2026-02-05 21:46:07,420 - Experiment - INFO - [Validation] epoch 12 val_loss:14.501357199928977
+2026-02-05 21:46:07,420 - Experiment - INFO - [Scheduler] epoch 12 lr:0.001
+2026-02-05 21:46:26,070 - Experiment - INFO - epoch 13 train_loss:20.81226787452926
+2026-02-05 21:46:29,575 - Experiment - INFO - [Validation] epoch 13 val_loss:14.950444602966309
+2026-02-05 21:46:29,575 - Experiment - INFO - [Scheduler] epoch 13 lr:0.001
+2026-02-05 21:46:48,212 - Experiment - INFO - epoch 14 train_loss:20.03812531796758
+2026-02-05 21:46:51,698 - Experiment - INFO - [Validation] epoch 14 val_loss:14.039162757179954
+2026-02-05 21:46:51,698 - Experiment - INFO - [Scheduler] epoch 14 lr:0.001
+2026-02-05 21:47:10,356 - Experiment - INFO - epoch 15 train_loss:19.763410408339816
+2026-02-05 21:47:13,843 - Experiment - INFO - [Validation] epoch 15 val_loss:14.33088528026234
+2026-02-05 21:47:17,305 - Experiment - INFO - [Test][imputation] epoch 15 mae:[14.048507690429688] rmse:[21.364028930664062] mape:[0.10418028384447098]
+2026-02-05 21:47:17,305 - Experiment - INFO - [Scheduler] epoch 15 lr:0.001
+2026-02-05 21:47:35,940 - Experiment - INFO - epoch 16 train_loss:19.568274834912692
+2026-02-05 21:47:39,434 - Experiment - INFO - [Validation] epoch 16 val_loss:14.756151303378019
+2026-02-05 21:47:39,434 - Experiment - INFO - [Scheduler] epoch 16 lr:0.001
+2026-02-05 21:47:58,078 - Experiment - INFO - epoch 17 train_loss:19.544602456920874
+2026-02-05 21:48:01,582 - Experiment - INFO - [Validation] epoch 17 val_loss:14.420870919661088
+2026-02-05 21:48:01,582 - Experiment - INFO - [Scheduler] epoch 17 lr:0.001
+2026-02-05 21:48:20,218 - Experiment - INFO - epoch 18 train_loss:19.471503834524555
+2026-02-05 21:48:23,719 - Experiment - INFO - [Validation] epoch 18 val_loss:14.796316337585449
+2026-02-05 21:48:23,719 - Experiment - INFO - [Scheduler] epoch 18 lr:0.001
+2026-02-05 21:48:42,360 - Experiment - INFO - epoch 19 train_loss:19.17999932294834
+2026-02-05 21:48:45,855 - Experiment - INFO - [Validation] epoch 19 val_loss:14.0585786299272
+2026-02-05 21:48:45,855 - Experiment - INFO - [Scheduler] epoch 19 lr:0.001
+2026-02-05 21:49:04,510 - Experiment - INFO - epoch 20 train_loss:18.97732615899183
+2026-02-05 21:49:08,005 - Experiment - INFO - [Validation] epoch 20 val_loss:14.162560046802868
+2026-02-05 21:49:11,480 - Experiment - INFO - [Test][imputation] epoch 20 mae:[13.90792179107666] rmse:[21.208179473876953] mape:[0.10815152525901794]
+2026-02-05 21:49:11,480 - Experiment - INFO - [Scheduler] epoch 20 lr:0.001
+2026-02-05 21:49:30,112 - Experiment - INFO - epoch 21 train_loss:18.925764369393537
+2026-02-05 21:49:33,610 - Experiment - INFO - [Validation] epoch 21 val_loss:13.909098104997115
+2026-02-05 21:49:33,610 - Experiment - INFO - [Scheduler] epoch 21 lr:0.001
+2026-02-05 21:49:52,254 - Experiment - INFO - epoch 22 train_loss:18.790028160917544
+2026-02-05 21:49:55,753 - Experiment - INFO - [Validation] epoch 22 val_loss:13.962485088001598
+2026-02-05 21:49:55,754 - Experiment - INFO - [Scheduler] epoch 22 lr:0.001
+2026-02-05 21:50:14,372 - Experiment - INFO - epoch 23 train_loss:19.558900147854924
+2026-02-05 21:50:17,881 - Experiment - INFO - [Validation] epoch 23 val_loss:14.31512754613703
+2026-02-05 21:50:17,881 - Experiment - INFO - [Scheduler] epoch 23 lr:0.001
+2026-02-05 21:50:36,543 - Experiment - INFO - epoch 24 train_loss:18.537897646784067
+2026-02-05 21:50:40,039 - Experiment - INFO - [Validation] epoch 24 val_loss:13.790075042031027
+2026-02-05 21:50:40,039 - Experiment - INFO - [Scheduler] epoch 24 lr:0.001
+2026-02-05 21:50:58,687 - Experiment - INFO - epoch 25 train_loss:18.267397041092376
+2026-02-05 21:51:02,197 - Experiment - INFO - [Validation] epoch 25 val_loss:13.791008273037997
+2026-02-05 21:51:05,678 - Experiment - INFO - [Test][imputation] epoch 25 mae:[13.506874084472656] rmse:[20.825178146362305] mape:[0.09383629262447357]
+2026-02-05 21:51:05,678 - Experiment - INFO - [Scheduler] epoch 25 lr:0.001
+2026-02-05 21:51:24,317 - Experiment - INFO - epoch 26 train_loss:18.24252556897923
+2026-02-05 21:51:27,825 - Experiment - INFO - [Validation] epoch 26 val_loss:14.334736147793857
+2026-02-05 21:51:27,826 - Experiment - INFO - [Scheduler] epoch 26 lr:0.001
+2026-02-05 21:51:46,471 - Experiment - INFO - epoch 27 train_loss:18.226277414196264
+2026-02-05 21:51:49,979 - Experiment - INFO - [Validation] epoch 27 val_loss:13.852145697853782
+2026-02-05 21:51:49,979 - Experiment - INFO - [Scheduler] epoch 27 lr:0.001
+2026-02-05 21:52:08,635 - Experiment - INFO - epoch 28 train_loss:17.976784192159503
+2026-02-05 21:52:12,161 - Experiment - INFO - [Validation] epoch 28 val_loss:13.7401235407049
+2026-02-05 21:52:12,161 - Experiment - INFO - [Scheduler] epoch 28 lr:0.001
+2026-02-05 21:52:30,803 - Experiment - INFO - epoch 29 train_loss:17.896002706653345
+2026-02-05 21:52:34,306 - Experiment - INFO - [Validation] epoch 29 val_loss:14.108053692904386
+2026-02-05 21:52:34,306 - Experiment - INFO - [Scheduler] epoch 29 lr:0.001
+2026-02-05 21:52:52,939 - Experiment - INFO - epoch 30 train_loss:17.92735830181373
+2026-02-05 21:52:56,446 - Experiment - INFO - [Validation] epoch 30 val_loss:13.98832560452548
+2026-02-05 21:52:59,930 - Experiment - INFO - [Test][imputation] epoch 30 mae:[13.7101411819458] rmse:[20.935077667236328] mape:[0.10910144448280334]
+2026-02-05 21:52:59,930 - Experiment - INFO - [Scheduler] epoch 30 lr:0.001
+2026-02-05 21:53:18,587 - Experiment - INFO - epoch 31 train_loss:17.833221435546875
+2026-02-05 21:53:22,106 - Experiment - INFO - [Validation] epoch 31 val_loss:13.67014928297563
+2026-02-05 21:53:22,106 - Experiment - INFO - [Scheduler] epoch 31 lr:0.001
+2026-02-05 21:53:40,752 - Experiment - INFO - epoch 32 train_loss:17.66750532138847
+2026-02-05 21:53:44,267 - Experiment - INFO - [Validation] epoch 32 val_loss:13.837501994046297
+2026-02-05 21:53:44,267 - Experiment - INFO - [Scheduler] epoch 32 lr:0.001
+2026-02-05 21:54:02,924 - Experiment - INFO - epoch 33 train_loss:17.554481335028917
+2026-02-05 21:54:06,426 - Experiment - INFO - [Validation] epoch 33 val_loss:13.887325564297763
+2026-02-05 21:54:06,426 - Experiment - INFO - [Scheduler] epoch 33 lr:0.001
+2026-02-05 21:54:25,071 - Experiment - INFO - epoch 34 train_loss:17.58073241410855
+2026-02-05 21:54:28,578 - Experiment - INFO - [Validation] epoch 34 val_loss:14.647982874783603
+2026-02-05 21:54:28,579 - Experiment - INFO - [Scheduler] epoch 34 lr:0.001
+2026-02-05 21:54:47,234 - Experiment - INFO - epoch 35 train_loss:17.479332290009825
+2026-02-05 21:54:50,755 - Experiment - INFO - [Validation] epoch 35 val_loss:14.940246287259189
+2026-02-05 21:54:54,242 - Experiment - INFO - [Test][imputation] epoch 35 mae:[14.744752883911133] rmse:[21.44147491455078] mape:[0.14201928675174713]
+2026-02-05 21:54:54,242 - Experiment - INFO - [Scheduler] epoch 35 lr:0.001
+2026-02-05 21:55:12,906 - Experiment - INFO - epoch 36 train_loss:17.516225043885008
+2026-02-05 21:55:16,433 - Experiment - INFO - [Validation] epoch 36 val_loss:13.531391577287154
+2026-02-05 21:55:16,433 - Experiment - INFO - [Scheduler] epoch 36 lr:0.001
+2026-02-05 21:55:35,098 - Experiment - INFO - epoch 37 train_loss:17.19828881475026
+2026-02-05 21:55:38,609 - Experiment - INFO - [Validation] epoch 37 val_loss:13.577819806879218
+2026-02-05 21:55:38,609 - Experiment - INFO - [Scheduler] epoch 37 lr:0.001
+2026-02-05 21:55:57,276 - Experiment - INFO - epoch 38 train_loss:17.442142646469755
+2026-02-05 21:56:00,795 - Experiment - INFO - [Validation] epoch 38 val_loss:13.753612743724476
+2026-02-05 21:56:00,796 - Experiment - INFO - [Scheduler] epoch 38 lr:0.001
+2026-02-05 21:56:19,445 - Experiment - INFO - epoch 39 train_loss:17.251676256785135
+2026-02-05 21:56:22,964 - Experiment - INFO - [Validation] epoch 39 val_loss:13.42326374053955
+2026-02-05 21:56:22,964 - Experiment - INFO - [Scheduler] epoch 39 lr:0.001
+2026-02-05 21:56:41,612 - Experiment - INFO - epoch 40 train_loss:17.132527471302513
+2026-02-05 21:56:45,125 - Experiment - INFO - [Validation] epoch 40 val_loss:13.493221855163574
+2026-02-05 21:56:48,609 - Experiment - INFO - [Test][imputation] epoch 40 mae:[13.222681045532227] rmse:[20.53685760498047] mape:[0.0958549976348877]
+2026-02-05 21:56:48,609 - Experiment - INFO - [Scheduler] epoch 40 lr:0.001
+2026-02-05 21:57:07,279 - Experiment - INFO - epoch 41 train_loss:17.063418948007914
+2026-02-05 21:57:10,798 - Experiment - INFO - [Validation] epoch 41 val_loss:13.545242673700505
+2026-02-05 21:57:10,798 - Experiment - INFO - [Scheduler] epoch 41 lr:0.001
+2026-02-05 21:57:29,450 - Experiment - INFO - epoch 42 train_loss:17.08725128630678
+2026-02-05 21:57:32,971 - Experiment - INFO - [Validation] epoch 42 val_loss:13.625141247836027
+2026-02-05 21:57:32,971 - Experiment - INFO - [Scheduler] epoch 42 lr:0.001
+2026-02-05 21:57:51,618 - Experiment - INFO - epoch 43 train_loss:16.849306677629848
+2026-02-05 21:57:55,133 - Experiment - INFO - [Validation] epoch 43 val_loss:13.648095200278542
+2026-02-05 21:57:55,134 - Experiment - INFO - [Scheduler] epoch 43 lr:0.001
+2026-02-05 21:58:13,790 - Experiment - INFO - epoch 44 train_loss:16.846361400124554
+2026-02-05 21:58:17,320 - Experiment - INFO - [Validation] epoch 44 val_loss:13.469475121931596
+2026-02-05 21:58:17,320 - Experiment - INFO - [Scheduler] epoch 44 lr:0.001
+2026-02-05 21:58:35,977 - Experiment - INFO - epoch 45 train_loss:16.985528631838495
+2026-02-05 21:58:39,487 - Experiment - INFO - [Validation] epoch 45 val_loss:13.989133141257547
+2026-02-05 21:58:42,949 - Experiment - INFO - [Test][imputation] epoch 45 mae:[13.715153694152832] rmse:[21.11654281616211] mape:[0.09537384659051895]
+2026-02-05 21:58:42,949 - Experiment - INFO - [Scheduler] epoch 45 lr:0.001
+2026-02-05 21:59:01,596 - Experiment - INFO - epoch 46 train_loss:16.797572221584662
+2026-02-05 21:59:05,113 - Experiment - INFO - [Validation] epoch 46 val_loss:13.537170115384189
+2026-02-05 21:59:05,113 - Experiment - INFO - [Scheduler] epoch 46 lr:0.001
+2026-02-05 21:59:23,766 - Experiment - INFO - epoch 47 train_loss:16.888020332701906
+2026-02-05 21:59:27,293 - Experiment - INFO - [Validation] epoch 47 val_loss:13.589813059026545
+2026-02-05 21:59:27,293 - Experiment - INFO - [Scheduler] epoch 47 lr:0.001
+2026-02-05 21:59:45,962 - Experiment - INFO - epoch 48 train_loss:16.516229458197863
+2026-02-05 21:59:49,471 - Experiment - INFO - [Validation] epoch 48 val_loss:13.500892725857822
+2026-02-05 21:59:49,471 - Experiment - INFO - [Scheduler] epoch 48 lr:0.001
+2026-02-05 22:00:08,132 - Experiment - INFO - epoch 49 train_loss:16.71580131325179
+2026-02-05 22:00:11,643 - Experiment - INFO - [Validation] epoch 49 val_loss:13.406936888261274
+2026-02-05 22:00:11,643 - Experiment - INFO - [Scheduler] epoch 49 lr:0.001
+2026-02-05 22:00:30,318 - Experiment - INFO - epoch 50 train_loss:16.584347667808306
+2026-02-05 22:00:33,831 - Experiment - INFO - [Validation] epoch 50 val_loss:13.332446167685768
+2026-02-05 22:00:37,316 - Experiment - INFO - [Test][imputation] epoch 50 mae:[13.09156322479248] rmse:[20.362106323242188] mape:[0.08850676566362381]
+2026-02-05 22:00:37,316 - Experiment - INFO - [Scheduler] epoch 50 lr:0.001
+2026-02-05 22:00:55,967 - Experiment - INFO - epoch 51 train_loss:16.56359912392622
+2026-02-05 22:00:59,483 - Experiment - INFO - [Validation] epoch 51 val_loss:13.943017474087801
+2026-02-05 22:00:59,483 - Experiment - INFO - [Scheduler] epoch 51 lr:0.001
+2026-02-05 22:01:18,138 - Experiment - INFO - epoch 52 train_loss:16.512383192599177
+2026-02-05 22:01:21,662 - Experiment - INFO - [Validation] epoch 52 val_loss:13.75891199978915
+2026-02-05 22:01:21,663 - Experiment - INFO - [Scheduler] epoch 52 lr:0.001
+2026-02-05 22:01:40,333 - Experiment - INFO - epoch 53 train_loss:16.575920693174808
+2026-02-05 22:01:43,856 - Experiment - INFO - [Validation] epoch 53 val_loss:13.733744864030317
+2026-02-05 22:01:43,856 - Experiment - INFO - [Scheduler] epoch 53 lr:0.001
+2026-02-05 22:02:02,505 - Experiment - INFO - epoch 54 train_loss:16.533035318294687
+2026-02-05 22:02:06,022 - Experiment - INFO - [Validation] epoch 54 val_loss:13.68984902121804
+2026-02-05 22:02:06,022 - Experiment - INFO - [Scheduler] epoch 54 lr:0.001
+2026-02-05 22:02:24,677 - Experiment - INFO - epoch 55 train_loss:16.362059758808797
+2026-02-05 22:02:28,197 - Experiment - INFO - [Validation] epoch 55 val_loss:13.460514554110441
+2026-02-05 22:02:31,680 - Experiment - INFO - [Test][imputation] epoch 55 mae:[13.211380958557129] rmse:[20.41567611694336] mape:[0.09230687469244003]
+2026-02-05 22:02:31,680 - Experiment - INFO - [Scheduler] epoch 55 lr:0.001
+2026-02-05 22:02:50,341 - Experiment - INFO - epoch 56 train_loss:16.28696273758026
+2026-02-05 22:02:53,875 - Experiment - INFO - [Validation] epoch 56 val_loss:13.332435070384632
+2026-02-05 22:02:53,875 - Experiment - INFO - [Scheduler] epoch 56 lr:0.001
+2026-02-05 22:03:12,538 - Experiment - INFO - epoch 57 train_loss:16.260986996268084
+2026-02-05 22:03:16,065 - Experiment - INFO - [Validation] epoch 57 val_loss:13.552741033380682
+2026-02-05 22:03:16,065 - Experiment - INFO - [Scheduler] epoch 57 lr:0.001
+2026-02-05 22:03:34,735 - Experiment - INFO - epoch 58 train_loss:16.36752539766049
+2026-02-05 22:03:38,257 - Experiment - INFO - [Validation] epoch 58 val_loss:13.325665820728648
+2026-02-05 22:03:38,257 - Experiment - INFO - [Scheduler] epoch 58 lr:0.001
+2026-02-05 22:03:56,902 - Experiment - INFO - epoch 59 train_loss:16.23716324674869
+2026-02-05 22:04:00,419 - Experiment - INFO - [Validation] epoch 59 val_loss:13.326373741843483
+2026-02-05 22:04:00,419 - Experiment - INFO - [Scheduler] epoch 59 lr:0.001
+2026-02-05 22:04:19,069 - Experiment - INFO - epoch 60 train_loss:16.11618274414611
+2026-02-05 22:04:22,586 - Experiment - INFO - [Validation] epoch 60 val_loss:13.3684608112682
+2026-02-05 22:04:26,083 - Experiment - INFO - [Test][imputation] epoch 60 mae:[13.123454093933105] rmse:[20.352901458740234] mape:[0.09370320290327072]
+2026-02-05 22:04:26,083 - Experiment - INFO - [Scheduler] epoch 60 lr:0.001
+2026-02-05 22:04:44,743 - Experiment - INFO - epoch 61 train_loss:16.08653184468161
+2026-02-05 22:04:48,264 - Experiment - INFO - [Validation] epoch 61 val_loss:13.29562958804044
+2026-02-05 22:04:48,264 - Experiment - INFO - [Scheduler] epoch 61 lr:0.001
+2026-02-05 22:05:06,941 - Experiment - INFO - epoch 62 train_loss:16.033071083936864
+2026-02-05 22:05:10,466 - Experiment - INFO - [Validation] epoch 62 val_loss:13.576049301841042
+2026-02-05 22:05:10,467 - Experiment - INFO - [Scheduler] epoch 62 lr:0.001
+2026-02-05 22:05:29,137 - Experiment - INFO - epoch 63 train_loss:15.999802960607106
+2026-02-05 22:05:32,661 - Experiment - INFO - [Validation] epoch 63 val_loss:13.286582998795943
+2026-02-05 22:05:32,661 - Experiment - INFO - [Scheduler] epoch 63 lr:0.001
+2026-02-05 22:05:51,333 - Experiment - INFO - epoch 64 train_loss:16.007971535185852
+2026-02-05 22:05:54,861 - Experiment - INFO - [Validation] epoch 64 val_loss:13.314481145685368
+2026-02-05 22:05:54,862 - Experiment - INFO - [Scheduler] epoch 64 lr:0.001
+2026-02-05 22:06:13,531 - Experiment - INFO - epoch 65 train_loss:15.971090830728679
+2026-02-05 22:06:17,052 - Experiment - INFO - [Validation] epoch 65 val_loss:13.286721246892755
+2026-02-05 22:06:20,544 - Experiment - INFO - [Test][imputation] epoch 65 mae:[13.046953201293945] rmse:[20.325632095336914] mape:[0.09029870480298996]
+2026-02-05 22:06:20,544 - Experiment - INFO - [Scheduler] epoch 65 lr:0.001
+2026-02-05 22:06:39,201 - Experiment - INFO - epoch 66 train_loss:15.904601102817558
+2026-02-05 22:06:42,728 - Experiment - INFO - [Validation] epoch 66 val_loss:13.479373481056907
+2026-02-05 22:06:42,728 - Experiment - INFO - [Scheduler] epoch 66 lr:0.001
+2026-02-05 22:07:01,394 - Experiment - INFO - epoch 67 train_loss:15.919385607371073
+2026-02-05 22:07:04,917 - Experiment - INFO - [Validation] epoch 67 val_loss:13.283006269281561
+2026-02-05 22:07:04,917 - Experiment - INFO - [Scheduler] epoch 67 lr:0.001
+2026-02-05 22:07:23,591 - Experiment - INFO - epoch 68 train_loss:15.859817836099042
+2026-02-05 22:07:27,110 - Experiment - INFO - [Validation] epoch 68 val_loss:13.274060769514604
+2026-02-05 22:07:27,110 - Experiment - INFO - [Scheduler] epoch 68 lr:0.001
+2026-02-05 22:07:45,761 - Experiment - INFO - epoch 69 train_loss:15.824808006515045
+2026-02-05 22:07:49,282 - Experiment - INFO - [Validation] epoch 69 val_loss:13.471126799149946
+2026-02-05 22:07:49,282 - Experiment - INFO - [Scheduler] epoch 69 lr:0.001
+2026-02-05 22:08:07,958 - Experiment - INFO - epoch 70 train_loss:15.92420695070735
+2026-02-05 22:08:11,478 - Experiment - INFO - [Validation] epoch 70 val_loss:13.30822214646773
+2026-02-05 22:08:14,982 - Experiment - INFO - [Test][imputation] epoch 70 mae:[13.077868461608887] rmse:[20.362520217895508] mape:[0.08878768235445023]
+2026-02-05 22:08:14,982 - Experiment - INFO - [Scheduler] epoch 70 lr:0.001
+2026-02-05 22:08:33,650 - Experiment - INFO - epoch 71 train_loss:15.891736949989182
+2026-02-05 22:08:37,175 - Experiment - INFO - [Validation] epoch 71 val_loss:13.246544820612128
+2026-02-05 22:08:37,175 - Experiment - INFO - [Scheduler] epoch 71 lr:0.001
+2026-02-05 22:08:55,821 - Experiment - INFO - epoch 72 train_loss:15.770763191634309
+2026-02-05 22:08:59,343 - Experiment - INFO - [Validation] epoch 72 val_loss:13.233676407553933
+2026-02-05 22:08:59,343 - Experiment - INFO - [Scheduler] epoch 72 lr:0.001
+2026-02-05 22:09:17,994 - Experiment - INFO - epoch 73 train_loss:15.749644793436198
+2026-02-05 22:09:21,525 - Experiment - INFO - [Validation] epoch 73 val_loss:13.321824420582164
+2026-02-05 22:09:21,525 - Experiment - INFO - [Scheduler] epoch 73 lr:0.001
+2026-02-05 22:09:40,191 - Experiment - INFO - epoch 74 train_loss:15.669174696870906
+2026-02-05 22:09:43,720 - Experiment - INFO - [Validation] epoch 74 val_loss:13.259054183959961
+2026-02-05 22:09:43,720 - Experiment - INFO - [Scheduler] epoch 74 lr:0.001
+2026-02-05 22:10:02,388 - Experiment - INFO - epoch 75 train_loss:15.608884748584495
+2026-02-05 22:10:05,925 - Experiment - INFO - [Validation] epoch 75 val_loss:13.240033739263362
+2026-02-05 22:10:09,411 - Experiment - INFO - [Test][imputation] epoch 75 mae:[13.003418922424316] rmse:[20.319917678833008] mape:[0.08752806484699249]
+2026-02-05 22:10:09,411 - Experiment - INFO - [Scheduler] epoch 75 lr:0.001
+2026-02-05 22:10:28,079 - Experiment - INFO - epoch 76 train_loss:15.83299487793517
+2026-02-05 22:10:31,611 - Experiment - INFO - [Validation] epoch 76 val_loss:13.414114050431685
+2026-02-05 22:10:31,611 - Experiment - INFO - [Scheduler] epoch 76 lr:0.001
+2026-02-05 22:10:50,281 - Experiment - INFO - epoch 77 train_loss:15.637312363721653
+2026-02-05 22:10:53,806 - Experiment - INFO - [Validation] epoch 77 val_loss:13.207543650540439
+2026-02-05 22:10:53,806 - Experiment - INFO - [Scheduler] epoch 77 lr:0.001
+2026-02-05 22:11:12,478 - Experiment - INFO - epoch 78 train_loss:15.600218967049422
+2026-02-05 22:11:16,013 - Experiment - INFO - [Validation] epoch 78 val_loss:13.2341157393022
+2026-02-05 22:11:16,014 - Experiment - INFO - [Scheduler] epoch 78 lr:0.001
+2026-02-05 22:11:34,675 - Experiment - INFO - epoch 79 train_loss:15.57949046174923
+2026-02-05 22:11:38,179 - Experiment - INFO - [Validation] epoch 79 val_loss:13.437281886014071
+2026-02-05 22:11:38,179 - Experiment - INFO - [Scheduler] epoch 79 lr:0.001
+2026-02-05 22:11:56,848 - Experiment - INFO - epoch 80 train_loss:15.503617480843367
+2026-02-05 22:12:00,359 - Experiment - INFO - [Validation] epoch 80 val_loss:13.217854846607555
+2026-02-05 22:12:03,839 - Experiment - INFO - [Test][imputation] epoch 80 mae:[12.982020378112793] rmse:[20.266815185546875] mape:[0.08762763440608978]
+2026-02-05 22:12:03,839 - Experiment - INFO - [Scheduler] epoch 80 lr:0.001
+2026-02-05 22:12:22,508 - Experiment - INFO - epoch 81 train_loss:15.438037946552573
+2026-02-05 22:12:26,043 - Experiment - INFO - [Validation] epoch 81 val_loss:13.221752478859642
+2026-02-05 22:12:26,043 - Experiment - INFO - [Scheduler] epoch 81 lr:0.001
+2026-02-05 22:12:44,709 - Experiment - INFO - epoch 82 train_loss:15.561030587750281
+2026-02-05 22:12:48,241 - Experiment - INFO - [Validation] epoch 82 val_loss:13.235979981855913
+2026-02-05 22:12:48,241 - Experiment - INFO - [Scheduler] epoch 82 lr:0.001
+2026-02-05 22:13:06,907 - Experiment - INFO - epoch 83 train_loss:15.512369155883789
+2026-02-05 22:13:10,410 - Experiment - INFO - [Validation] epoch 83 val_loss:13.440837652033025
+2026-02-05 22:13:10,410 - Experiment - INFO - [Scheduler] epoch 83 lr:0.001
+2026-02-05 22:13:29,073 - Experiment - INFO - epoch 84 train_loss:15.431591285203032
+2026-02-05 22:13:32,586 - Experiment - INFO - [Validation] epoch 84 val_loss:13.21961871060458
+2026-02-05 22:13:32,586 - Experiment - INFO - [Scheduler] epoch 84 lr:0.001
+2026-02-05 22:13:51,245 - Experiment - INFO - epoch 85 train_loss:15.359348645467245
+2026-02-05 22:13:54,769 - Experiment - INFO - [Validation] epoch 85 val_loss:13.259388438138094
+2026-02-05 22:13:58,263 - Experiment - INFO - [Test][imputation] epoch 85 mae:[13.014571189880371] rmse:[20.31492042541504] mape:[0.08687854558229446]
+2026-02-05 22:13:58,263 - Experiment - INFO - [Scheduler] epoch 85 lr:0.001
+2026-02-05 22:14:16,914 - Experiment - INFO - epoch 86 train_loss:15.373402292856913
+2026-02-05 22:14:20,451 - Experiment - INFO - [Validation] epoch 86 val_loss:13.420406341552734
+2026-02-05 22:14:20,451 - Experiment - INFO - [Scheduler] epoch 86 lr:0.001
+2026-02-05 22:14:39,106 - Experiment - INFO - epoch 87 train_loss:15.387443942224195
+2026-02-05 22:14:42,640 - Experiment - INFO - [Validation] epoch 87 val_loss:13.202557702498002
+2026-02-05 22:14:42,640 - Experiment - INFO - [Scheduler] epoch 87 lr:0.001
+2026-02-05 22:15:01,306 - Experiment - INFO - epoch 88 train_loss:15.478211631318052
+2026-02-05 22:15:04,837 - Experiment - INFO - [Validation] epoch 88 val_loss:13.477741674943404
+2026-02-05 22:15:04,837 - Experiment - INFO - [Scheduler] epoch 88 lr:0.001
+2026-02-05 22:15:23,507 - Experiment - INFO - epoch 89 train_loss:15.311060191628462
+2026-02-05 22:15:27,039 - Experiment - INFO - [Validation] epoch 89 val_loss:13.35680344321511
+2026-02-05 22:15:27,040 - Experiment - INFO - [Scheduler] epoch 89 lr:0.001
+2026-02-05 22:15:45,700 - Experiment - INFO - epoch 90 train_loss:15.242167033121257
+2026-02-05 22:15:49,232 - Experiment - INFO - [Validation] epoch 90 val_loss:13.25520111430775
+2026-02-05 22:15:52,729 - Experiment - INFO - [Test][imputation] epoch 90 mae:[13.025753021240234] rmse:[20.2965087890625] mape:[0.09040345251560211]
+2026-02-05 22:15:52,729 - Experiment - INFO - [Scheduler] epoch 90 lr:0.001
+2026-02-05 22:16:11,396 - Experiment - INFO - epoch 91 train_loss:15.284350977686351
+2026-02-05 22:16:14,928 - Experiment - INFO - [Validation] epoch 91 val_loss:13.184742372686213
+2026-02-05 22:16:14,928 - Experiment - INFO - [Scheduler] epoch 91 lr:0.001
+2026-02-05 22:16:33,593 - Experiment - INFO - epoch 92 train_loss:15.303869213172776
+2026-02-05 22:16:37,124 - Experiment - INFO - [Validation] epoch 92 val_loss:13.216189297762783
+2026-02-05 22:16:37,124 - Experiment - INFO - [Scheduler] epoch 92 lr:0.001
+2026-02-05 22:16:55,795 - Experiment - INFO - epoch 93 train_loss:15.244886072809825
+2026-02-05 22:16:59,314 - Experiment - INFO - [Validation] epoch 93 val_loss:13.243711350180886
+2026-02-05 22:16:59,314 - Experiment - INFO - [Scheduler] epoch 93 lr:0.001
+2026-02-05 22:17:17,991 - Experiment - INFO - epoch 94 train_loss:15.277822483085586
+2026-02-05 22:17:21,522 - Experiment - INFO - [Validation] epoch 94 val_loss:13.30828862623735
+2026-02-05 22:17:21,522 - Experiment - INFO - [Scheduler] epoch 94 lr:0.001
+2026-02-05 22:17:40,188 - Experiment - INFO - epoch 95 train_loss:15.253730819610778
+2026-02-05 22:17:43,711 - Experiment - INFO - [Validation] epoch 95 val_loss:13.364041848616166
+2026-02-05 22:17:47,213 - Experiment - INFO - [Test][imputation] epoch 95 mae:[13.128382682800293] rmse:[20.332975387573242] mape:[0.09643886238336563]
+2026-02-05 22:17:47,213 - Experiment - INFO - [Scheduler] epoch 95 lr:0.001
+2026-02-05 22:18:05,880 - Experiment - INFO - epoch 96 train_loss:15.20339779653949
+2026-02-05 22:18:09,412 - Experiment - INFO - [Validation] epoch 96 val_loss:13.16975406299938
+2026-02-05 22:18:09,412 - Experiment - INFO - [Scheduler] epoch 96 lr:0.001
+2026-02-05 22:18:28,077 - Experiment - INFO - epoch 97 train_loss:15.177264967364465
+2026-02-05 22:18:31,608 - Experiment - INFO - [Validation] epoch 97 val_loss:13.236015163768421
+2026-02-05 22:18:31,608 - Experiment - INFO - [Scheduler] epoch 97 lr:0.001
+2026-02-05 22:18:50,288 - Experiment - INFO - epoch 98 train_loss:15.134330635299225
+2026-02-05 22:18:53,833 - Experiment - INFO - [Validation] epoch 98 val_loss:13.211121663180265
+2026-02-05 22:18:53,833 - Experiment - INFO - [Scheduler] epoch 98 lr:0.001
+2026-02-05 22:19:12,501 - Experiment - INFO - epoch 99 train_loss:15.254542938963382
+2026-02-05 22:19:16,035 - Experiment - INFO - [Validation] epoch 99 val_loss:13.177220604636453
+2026-02-05 22:19:16,035 - Experiment - INFO - [Scheduler] epoch 99 lr:0.001
+2026-02-05 22:19:34,703 - Experiment - INFO - epoch 100 train_loss:15.093597286475633
+2026-02-05 22:19:38,253 - Experiment - INFO - [Validation] epoch 100 val_loss:13.180696626143021
+2026-02-05 22:19:41,749 - Experiment - INFO - [Test][imputation] epoch 100 mae:[12.9617919921875] rmse:[20.29663848876953] mape:[0.08870444446802139]
+2026-02-05 22:19:41,749 - Experiment - INFO - [Scheduler] epoch 100 lr:0.001
+2026-02-05 22:20:00,445 - Experiment - INFO - epoch 101 train_loss:15.107334953582216
+2026-02-05 22:20:03,987 - Experiment - INFO - [Validation] epoch 101 val_loss:13.501154604825107
+2026-02-05 22:20:03,987 - Experiment - INFO - [Scheduler] epoch 101 lr:0.001
+2026-02-05 22:20:22,645 - Experiment - INFO - epoch 102 train_loss:15.080585799531308
+2026-02-05 22:20:26,178 - Experiment - INFO - [Validation] epoch 102 val_loss:13.282941818237305
+2026-02-05 22:20:26,178 - Experiment - INFO - [Scheduler] epoch 102 lr:0.001
+2026-02-05 22:20:44,847 - Experiment - INFO - epoch 103 train_loss:15.101754022929482
+2026-02-05 22:20:48,379 - Experiment - INFO - [Validation] epoch 103 val_loss:13.170042991638184
+2026-02-05 22:20:48,379 - Experiment - INFO - [Scheduler] epoch 103 lr:0.001
+2026-02-05 22:21:07,064 - Experiment - INFO - epoch 104 train_loss:15.039766871286723
+2026-02-05 22:21:10,604 - Experiment - INFO - [Validation] epoch 104 val_loss:13.388075013594193
+2026-02-05 22:21:10,604 - Experiment - INFO - [Scheduler] epoch 104 lr:0.001
+2026-02-05 22:21:29,262 - Experiment - INFO - epoch 105 train_loss:14.958815626041618
+2026-02-05 22:21:32,794 - Experiment - INFO - [Validation] epoch 105 val_loss:13.261256616765802
+2026-02-05 22:21:36,284 - Experiment - INFO - [Test][imputation] epoch 105 mae:[13.013715744018555] rmse:[20.306612014770508] mape:[0.09158060699701309]
+2026-02-05 22:21:36,284 - Experiment - INFO - [Scheduler] epoch 105 lr:0.001
+2026-02-05 22:21:54,928 - Experiment - INFO - epoch 106 train_loss:14.99288744555262
+2026-02-05 22:21:58,474 - Experiment - INFO - [Validation] epoch 106 val_loss:13.287935413013805
+2026-02-05 22:21:58,474 - Experiment - INFO - [Scheduler] epoch 106 lr:0.001
+2026-02-05 22:22:17,129 - Experiment - INFO - epoch 107 train_loss:14.997579694508078
+2026-02-05 22:22:20,669 - Experiment - INFO - [Validation] epoch 107 val_loss:13.177381220730869
+2026-02-05 22:22:20,669 - Experiment - INFO - [Scheduler] epoch 107 lr:0.0001
+2026-02-05 22:22:39,356 - Experiment - INFO - epoch 108 train_loss:14.575498221163265
+2026-02-05 22:22:42,901 - Experiment - INFO - [Validation] epoch 108 val_loss:13.02725009918213
+2026-02-05 22:22:42,901 - Experiment - INFO - [Scheduler] epoch 108 lr:0.0001
+2026-02-05 22:23:01,555 - Experiment - INFO - epoch 109 train_loss:14.46192398756564
+2026-02-05 22:23:05,100 - Experiment - INFO - [Validation] epoch 109 val_loss:12.9899620402943
+2026-02-05 22:23:05,100 - Experiment - INFO - [Scheduler] epoch 109 lr:0.0001
+2026-02-05 22:23:23,754 - Experiment - INFO - epoch 110 train_loss:14.408575132221518
+2026-02-05 22:23:27,288 - Experiment - INFO - [Validation] epoch 110 val_loss:12.992573061856357
+2026-02-05 22:23:30,785 - Experiment - INFO - [Test][imputation] epoch 110 mae:[12.758857727050781] rmse:[20.114681243896484] mape:[0.08419309556484222]
+2026-02-05 22:23:30,785 - Experiment - INFO - [Scheduler] epoch 110 lr:0.0001
+2026-02-05 22:23:49,446 - Experiment - INFO - epoch 111 train_loss:14.402634871933989
+2026-02-05 22:23:52,969 - Experiment - INFO - [Validation] epoch 111 val_loss:12.973981770602139
+2026-02-05 22:23:52,970 - Experiment - INFO - [Scheduler] epoch 111 lr:0.0001
+2026-02-05 22:24:11,643 - Experiment - INFO - epoch 112 train_loss:14.373794864037794
+2026-02-05 22:24:15,173 - Experiment - INFO - [Validation] epoch 112 val_loss:12.993037345192649
+2026-02-05 22:24:15,173 - Experiment - INFO - [Scheduler] epoch 112 lr:0.0001
+2026-02-05 22:24:33,839 - Experiment - INFO - epoch 113 train_loss:14.373925340389777
+2026-02-05 22:24:37,382 - Experiment - INFO - [Validation] epoch 113 val_loss:12.999671884016557
+2026-02-05 22:24:37,382 - Experiment - INFO - [Scheduler] epoch 113 lr:0.0001
+2026-02-05 22:24:56,058 - Experiment - INFO - epoch 114 train_loss:14.360055826381295
+2026-02-05 22:24:59,586 - Experiment - INFO - [Validation] epoch 114 val_loss:12.981981173428622
+2026-02-05 22:24:59,586 - Experiment - INFO - [Scheduler] epoch 114 lr:0.0001
+2026-02-05 22:25:18,262 - Experiment - INFO - epoch 115 train_loss:14.36053067624212
+2026-02-05 22:25:21,786 - Experiment - INFO - [Validation] epoch 115 val_loss:12.975181336836382
+2026-02-05 22:25:25,316 - Experiment - INFO - [Test][imputation] epoch 115 mae:[12.756158828735352] rmse:[20.106857299804688] mape:[0.08425089716911316]
+2026-02-05 22:25:25,316 - Experiment - INFO - [Scheduler] epoch 115 lr:0.0001
+2026-02-05 22:25:43,986 - Experiment - INFO - epoch 116 train_loss:14.347535144783066
+2026-02-05 22:25:47,535 - Experiment - INFO - [Validation] epoch 116 val_loss:12.979842324690384
+2026-02-05 22:25:47,535 - Experiment - INFO - [Scheduler] epoch 116 lr:0.0001
+2026-02-05 22:26:06,234 - Experiment - INFO - epoch 117 train_loss:14.345167439854787
+2026-02-05 22:26:09,777 - Experiment - INFO - [Validation] epoch 117 val_loss:12.990894595059482
+2026-02-05 22:26:09,777 - Experiment - INFO - [Scheduler] epoch 117 lr:0.0001
+2026-02-05 22:26:28,438 - Experiment - INFO - epoch 118 train_loss:14.340921613270652
+2026-02-05 22:26:31,974 - Experiment - INFO - [Validation] epoch 118 val_loss:12.984086296775125
+2026-02-05 22:26:31,974 - Experiment - INFO - [Scheduler] epoch 118 lr:0.0001
+2026-02-05 22:26:50,636 - Experiment - INFO - epoch 119 train_loss:14.321322709500432
+2026-02-05 22:26:54,193 - Experiment - INFO - [Validation] epoch 119 val_loss:12.977876975319603
+2026-02-05 22:26:54,193 - Experiment - INFO - [Scheduler] epoch 119 lr:0.0001
+2026-02-05 22:27:12,860 - Experiment - INFO - epoch 120 train_loss:14.32458241970953
+2026-02-05 22:27:16,415 - Experiment - INFO - [Validation] epoch 120 val_loss:12.983877632834695
+2026-02-05 22:27:19,894 - Experiment - INFO - [Test][imputation] epoch 120 mae:[12.75625228881836] rmse:[20.12615203857422] mape:[0.08409058302640915]
+2026-02-05 22:27:19,894 - Experiment - INFO - [Scheduler] epoch 120 lr:0.0001
+2026-02-05 22:27:38,558 - Experiment - INFO - epoch 121 train_loss:14.319193828605606
+2026-02-05 22:27:42,091 - Experiment - INFO - [Validation] epoch 121 val_loss:12.98662544597279
+2026-02-05 22:27:42,091 - Experiment - INFO - [Scheduler] epoch 121 lr:0.0001
+2026-02-05 22:28:00,749 - Experiment - INFO - epoch 122 train_loss:14.303141896596212
+2026-02-05 22:28:04,319 - Experiment - INFO - [Validation] epoch 122 val_loss:12.998355986855247
+2026-02-05 22:28:04,319 - Experiment - INFO - [Scheduler] epoch 122 lr:1e-05
+2026-02-05 22:28:22,973 - Experiment - INFO - epoch 123 train_loss:14.266688443943412
+2026-02-05 22:28:26,519 - Experiment - INFO - [Validation] epoch 123 val_loss:12.972799821333451
+2026-02-05 22:28:26,519 - Experiment - INFO - [Scheduler] epoch 123 lr:1e-05
+2026-02-05 22:28:45,173 - Experiment - INFO - epoch 124 train_loss:14.259413148114781
+2026-02-05 22:28:48,709 - Experiment - INFO - [Validation] epoch 124 val_loss:12.96334996656938
+2026-02-05 22:28:48,709 - Experiment - INFO - [Scheduler] epoch 124 lr:1e-05
+2026-02-05 22:29:07,373 - Experiment - INFO - epoch 125 train_loss:14.256013487627406
+2026-02-05 22:29:10,917 - Experiment - INFO - [Validation] epoch 125 val_loss:12.965795239535245
+2026-02-05 22:29:14,419 - Experiment - INFO - [Test][imputation] epoch 125 mae:[12.73948860168457] rmse:[20.106046676635742] mape:[0.08373469114303589]
+2026-02-05 22:29:14,419 - Experiment - INFO - [Scheduler] epoch 125 lr:1e-05
+2026-02-05 22:29:33,067 - Experiment - INFO - epoch 126 train_loss:14.253736364627313
+2026-02-05 22:29:36,606 - Experiment - INFO - [Validation] epoch 126 val_loss:12.970516967773438
+2026-02-05 22:29:36,606 - Experiment - INFO - [Scheduler] epoch 126 lr:1e-05
+2026-02-05 22:29:55,265 - Experiment - INFO - epoch 127 train_loss:14.266333420119599
+2026-02-05 22:29:58,814 - Experiment - INFO - [Validation] epoch 127 val_loss:12.974174118041992
+2026-02-05 22:29:58,814 - Experiment - INFO - [Scheduler] epoch 127 lr:1e-05
+2026-02-05 22:30:17,489 - Experiment - INFO - epoch 128 train_loss:14.248377017632215
+2026-02-05 22:30:21,020 - Experiment - INFO - [Validation] epoch 128 val_loss:12.96537094116211
+2026-02-05 22:30:21,020 - Experiment - INFO - [Scheduler] epoch 128 lr:1e-05
+2026-02-05 22:30:39,688 - Experiment - INFO - epoch 129 train_loss:14.248671383201005
+2026-02-05 22:30:43,240 - Experiment - INFO - [Validation] epoch 129 val_loss:12.95772389498624
+2026-02-05 22:30:43,240 - Experiment - INFO - [Scheduler] epoch 129 lr:1e-05
+2026-02-05 22:31:01,913 - Experiment - INFO - epoch 130 train_loss:14.25672075991145
+2026-02-05 22:31:05,452 - Experiment - INFO - [Validation] epoch 130 val_loss:12.961950666254216
+2026-02-05 22:31:08,956 - Experiment - INFO - [Test][imputation] epoch 130 mae:[12.7371826171875] rmse:[20.10289192199707] mape:[0.0838048905134201]
+2026-02-05 22:31:08,956 - Experiment - INFO - [Scheduler] epoch 130 lr:1e-05
+2026-02-05 22:31:27,635 - Experiment - INFO - epoch 131 train_loss:14.248334045181732
+2026-02-05 22:31:31,167 - Experiment - INFO - [Validation] epoch 131 val_loss:12.952922127463601
+2026-02-05 22:31:31,167 - Experiment - INFO - [Scheduler] epoch 131 lr:1e-05
+2026-02-05 22:31:49,834 - Experiment - INFO - epoch 132 train_loss:14.245059361714803
+2026-02-05 22:31:53,384 - Experiment - INFO - [Validation] epoch 132 val_loss:12.980864316766912
+2026-02-05 22:31:53,384 - Experiment - INFO - [Scheduler] epoch 132 lr:1e-05
+2026-02-05 22:32:12,055 - Experiment - INFO - epoch 133 train_loss:14.254452785332045
+2026-02-05 22:32:15,581 - Experiment - INFO - [Validation] epoch 133 val_loss:12.959630411321466
+2026-02-05 22:32:15,582 - Experiment - INFO - [Scheduler] epoch 133 lr:1e-05
+2026-02-05 22:32:34,255 - Experiment - INFO - epoch 134 train_loss:14.244714228692883
+2026-02-05 22:32:37,792 - Experiment - INFO - [Validation] epoch 134 val_loss:12.970702292702414
+2026-02-05 22:32:37,792 - Experiment - INFO - [Scheduler] epoch 134 lr:1e-05
+2026-02-05 22:32:56,451 - Experiment - INFO - epoch 135 train_loss:14.243627011419056
+2026-02-05 22:32:59,987 - Experiment - INFO - [Validation] epoch 135 val_loss:12.963196979869496
+2026-02-05 22:33:03,489 - Experiment - INFO - [Test][imputation] epoch 135 mae:[12.736742973327637] rmse:[20.104135513305664] mape:[0.08367610722780228]
+2026-02-05 22:33:03,489 - Experiment - INFO - [Scheduler] epoch 135 lr:1e-05
+2026-02-05 22:33:22,145 - Experiment - INFO - epoch 136 train_loss:14.249095831088677
+2026-02-05 22:33:25,687 - Experiment - INFO - [Validation] epoch 136 val_loss:12.96311333396218
+2026-02-05 22:33:25,687 - Experiment - INFO - [Scheduler] epoch 136 lr:1e-05
+2026-02-05 22:33:44,345 - Experiment - INFO - epoch 137 train_loss:14.245548002734155
+2026-02-05 22:33:47,878 - Experiment - INFO - [Validation] epoch 137 val_loss:12.962799869884144
+2026-02-05 22:33:47,878 - Experiment - INFO - [Scheduler] epoch 137 lr:1e-05
+2026-02-05 22:34:06,543 - Experiment - INFO - epoch 138 train_loss:14.235246521270204
+2026-02-05 22:34:10,093 - Experiment - INFO - [Validation] epoch 138 val_loss:12.959078580682927
+2026-02-05 22:34:10,093 - Experiment - INFO - [Scheduler] epoch 138 lr:1e-05
+2026-02-05 22:34:28,769 - Experiment - INFO - epoch 139 train_loss:14.238067626953125
+2026-02-05 22:34:32,295 - Experiment - INFO - [Validation] epoch 139 val_loss:12.961578265103427
+2026-02-05 22:34:32,295 - Experiment - INFO - [Scheduler] epoch 139 lr:1e-05
+2026-02-05 22:34:50,966 - Experiment - INFO - epoch 140 train_loss:14.248529514152846
+2026-02-05 22:34:54,502 - Experiment - INFO - [Validation] epoch 140 val_loss:12.963026324185458
+2026-02-05 22:34:58,009 - Experiment - INFO - [Test][imputation] epoch 140 mae:[12.738000869750977] rmse:[20.106603622436523] mape:[0.08383135497570038]
+2026-02-05 22:34:58,009 - Experiment - INFO - [Scheduler] epoch 140 lr:1e-05
+2026-02-05 22:35:16,669 - Experiment - INFO - epoch 141 train_loss:14.249385748080865
+2026-02-05 22:35:20,206 - Experiment - INFO - [Validation] epoch 141 val_loss:12.95431326085871
+2026-02-05 22:35:20,206 - Experiment - INFO - [Scheduler] epoch 141 lr:1e-05
+2026-02-05 22:35:38,860 - Experiment - INFO - epoch 142 train_loss:14.232939794391928
+2026-02-05 22:35:42,400 - Experiment - INFO - [Validation] epoch 142 val_loss:12.968545012040572
+2026-02-05 22:35:42,400 - Experiment - INFO - [Scheduler] epoch 142 lr:1.0000000000000002e-06
+2026-02-05 22:36:01,054 - Experiment - INFO - epoch 143 train_loss:14.237125922105983
+2026-02-05 22:36:04,587 - Experiment - INFO - [Validation] epoch 143 val_loss:12.962792673977939
+2026-02-05 22:36:04,587 - Experiment - INFO - [Scheduler] epoch 143 lr:1.0000000000000002e-06
+2026-02-05 22:36:23,253 - Experiment - INFO - epoch 144 train_loss:14.239429416770706
+2026-02-05 22:36:26,773 - Experiment - INFO - [Validation] epoch 144 val_loss:12.948895905234597
+2026-02-05 22:36:26,773 - Experiment - INFO - [Scheduler] epoch 144 lr:1.0000000000000002e-06
+2026-02-05 22:36:45,450 - Experiment - INFO - epoch 145 train_loss:14.246327520130636
+2026-02-05 22:36:48,981 - Experiment - INFO - [Validation] epoch 145 val_loss:12.963183836503463
+2026-02-05 22:36:52,494 - Experiment - INFO - [Test][imputation] epoch 145 mae:[12.73575210571289] rmse:[20.101512908935547] mape:[0.08368876576423645]
+2026-02-05 22:36:52,495 - Experiment - INFO - [Scheduler] epoch 145 lr:1.0000000000000002e-06
+2026-02-05 22:37:11,147 - Experiment - INFO - epoch 146 train_loss:14.235474078241223
+2026-02-05 22:37:14,681 - Experiment - INFO - [Validation] epoch 146 val_loss:12.953215061534534
+2026-02-05 22:37:14,681 - Experiment - INFO - [Scheduler] epoch 146 lr:1.0000000000000002e-06
+2026-02-05 22:37:33,374 - Experiment - INFO - epoch 147 train_loss:14.235241204678655
+2026-02-05 22:37:36,910 - Experiment - INFO - [Validation] epoch 147 val_loss:12.947662943059749
+2026-02-05 22:37:36,910 - Experiment - INFO - [Scheduler] epoch 147 lr:1.0000000000000002e-06
+2026-02-05 22:37:55,569 - Experiment - INFO - epoch 148 train_loss:14.232911269821807
+2026-02-05 22:37:59,101 - Experiment - INFO - [Validation] epoch 148 val_loss:12.964992315118963
+2026-02-05 22:37:59,101 - Experiment - INFO - [Scheduler] epoch 148 lr:1.0000000000000002e-06
+2026-02-05 22:38:17,763 - Experiment - INFO - epoch 149 train_loss:14.23654231910934
+2026-02-05 22:38:21,284 - Experiment - INFO - [Validation] epoch 149 val_loss:12.961169242858887
+2026-02-05 22:38:21,285 - Experiment - INFO - [Scheduler] epoch 149 lr:1.0000000000000002e-06
+2026-02-05 22:38:39,935 - Experiment - INFO - epoch 150 train_loss:14.230930197024774
+2026-02-05 22:38:43,469 - Experiment - INFO - [Validation] epoch 150 val_loss:12.963118917291814
+2026-02-05 22:38:46,963 - Experiment - INFO - [Test][imputation] epoch 150 mae:[12.736608505249023] rmse:[20.103891372680664] mape:[0.08371897041797638]
+2026-02-05 22:38:46,964 - Experiment - INFO - [Scheduler] epoch 150 lr:1.0000000000000002e-06
+2026-02-05 22:39:05,631 - Experiment - INFO - epoch 151 train_loss:14.231812340056825
+2026-02-05 22:39:09,167 - Experiment - INFO - [Validation] epoch 151 val_loss:12.954834279147061
+2026-02-05 22:39:09,167 - Experiment - INFO - [Scheduler] epoch 151 lr:1.0000000000000002e-06
+2026-02-05 22:39:27,827 - Experiment - INFO - epoch 152 train_loss:14.243767115884198
+2026-02-05 22:39:31,385 - Experiment - INFO - [Validation] epoch 152 val_loss:12.954187930714001
+2026-02-05 22:39:31,385 - Experiment - INFO - [Scheduler] epoch 152 lr:1.0000000000000002e-06
+2026-02-05 22:39:50,048 - Experiment - INFO - epoch 153 train_loss:14.230862006455839
+2026-02-05 22:39:53,579 - Experiment - INFO - [Validation] epoch 153 val_loss:12.953369955583053
+2026-02-05 22:39:53,579 - Experiment - INFO - [Scheduler] epoch 153 lr:1.0000000000000002e-06
+2026-02-05 22:40:12,246 - Experiment - INFO - epoch 154 train_loss:14.234087235913305
+2026-02-05 22:40:15,785 - Experiment - INFO - [Validation] epoch 154 val_loss:12.958237335898659
+2026-02-05 22:40:15,786 - Experiment - INFO - [Scheduler] epoch 154 lr:1.0000000000000002e-06
+2026-02-05 22:40:34,445 - Experiment - INFO - epoch 155 train_loss:14.234398070923582
+2026-02-05 22:40:37,985 - Experiment - INFO - [Validation] epoch 155 val_loss:12.961334280534224
+2026-02-05 22:40:41,480 - Experiment - INFO - [Test][imputation] epoch 155 mae:[12.736010551452637] rmse:[20.10274314880371] mape:[0.0836942046880722]
+2026-02-05 22:40:41,480 - Experiment - INFO - [Scheduler] epoch 155 lr:1.0000000000000002e-06
+2026-02-05 22:41:00,139 - Experiment - INFO - epoch 156 train_loss:14.230827542836082
+2026-02-05 22:41:03,674 - Experiment - INFO - [Validation] epoch 156 val_loss:12.966836738586426
+2026-02-05 22:41:03,674 - Experiment - INFO - [Scheduler] epoch 156 lr:1.0000000000000002e-06
+2026-02-05 22:41:22,335 - Experiment - INFO - epoch 157 train_loss:14.2259232583874
+2026-02-05 22:41:25,877 - Experiment - INFO - [Validation] epoch 157 val_loss:12.959075164794921
+2026-02-05 22:41:25,877 - Experiment - INFO - [Scheduler] epoch 157 lr:1.0000000000000002e-06
+2026-02-05 22:41:44,536 - Experiment - INFO - epoch 158 train_loss:14.232631175104016
+2026-02-05 22:41:48,063 - Experiment - INFO - [Validation] epoch 158 val_loss:12.957410257512873
+2026-02-05 22:41:48,063 - Experiment - INFO - [Scheduler] epoch 158 lr:1.0000000000000002e-06
+2026-02-05 22:42:06,729 - Experiment - INFO - epoch 159 train_loss:14.236381085332996
+2026-02-05 22:42:10,260 - Experiment - INFO - [Validation] epoch 159 val_loss:12.962221076271751
+2026-02-05 22:42:10,260 - Experiment - INFO - [Scheduler] epoch 159 lr:1.0000000000000002e-06
+2026-02-05 22:42:28,930 - Experiment - INFO - epoch 160 train_loss:14.230181602660767
+2026-02-05 22:42:32,463 - Experiment - INFO - [Validation] epoch 160 val_loss:12.959954088384455
+2026-02-05 22:42:35,962 - Experiment - INFO - [Test][imputation] epoch 160 mae:[12.736083984375] rmse:[20.102062225341797] mape:[0.08369918167591095]
+2026-02-05 22:42:35,962 - Experiment - INFO - [Scheduler] epoch 160 lr:1.0000000000000002e-06
+2026-02-05 22:42:54,626 - Experiment - INFO - epoch 161 train_loss:14.232235537317699
+2026-02-05 22:42:58,162 - Experiment - INFO - [Validation] epoch 161 val_loss:12.954147772355514
+2026-02-05 22:42:58,162 - Experiment - INFO - [Scheduler] epoch 161 lr:1.0000000000000002e-06
+2026-02-05 22:43:16,850 - Experiment - INFO - epoch 162 train_loss:14.23345534387463
+2026-02-05 22:43:20,371 - Experiment - INFO - [Validation] epoch 162 val_loss:12.961968924782493
+2026-02-05 22:43:20,372 - Experiment - INFO - [Scheduler] epoch 162 lr:1.0000000000000002e-06
+2026-02-05 22:43:39,048 - Experiment - INFO - epoch 163 train_loss:14.240614668337885
+2026-02-05 22:43:42,589 - Experiment - INFO - [Validation] epoch 163 val_loss:12.966910535638982
+2026-02-05 22:43:42,589 - Experiment - INFO - [Scheduler] epoch 163 lr:1.0000000000000002e-06
+2026-02-05 22:44:01,245 - Experiment - INFO - epoch 164 train_loss:14.22583031226061
+2026-02-05 22:44:04,784 - Experiment - INFO - [Validation] epoch 164 val_loss:12.95663724379106
+2026-02-05 22:44:04,784 - Experiment - INFO - [Scheduler] epoch 164 lr:1.0000000000000002e-06
+2026-02-05 22:44:23,443 - Experiment - INFO - epoch 165 train_loss:14.231513331750197
+2026-02-05 22:44:26,963 - Experiment - INFO - [Validation] epoch 165 val_loss:12.960685695301402
+2026-02-05 22:44:30,470 - Experiment - INFO - [Test][imputation] epoch 165 mae:[12.736422538757324] rmse:[20.103748321533203] mape:[0.08372563868761063]
+2026-02-05 22:44:30,470 - Experiment - INFO - [Scheduler] epoch 165 lr:1.0000000000000002e-06
+2026-02-05 22:44:49,140 - Experiment - INFO - epoch 166 train_loss:14.236163362057622
+2026-02-05 22:44:52,671 - Experiment - INFO - [Validation] epoch 166 val_loss:12.955886892838912
+2026-02-05 22:44:52,671 - Experiment - INFO - [Scheduler] epoch 166 lr:1.0000000000000002e-06
+2026-02-05 22:45:11,338 - Experiment - INFO - epoch 167 train_loss:14.226831213442866
+2026-02-05 22:45:14,875 - Experiment - INFO - [Validation] epoch 167 val_loss:12.96045242656361
+2026-02-05 22:45:14,875 - Experiment - INFO - [Scheduler] epoch 167 lr:1.0000000000000002e-06
+2026-02-05 22:45:33,525 - Experiment - INFO - epoch 168 train_loss:14.238805279760303
+2026-02-05 22:45:37,056 - Experiment - INFO - [Validation] epoch 168 val_loss:12.958025845614346
+2026-02-05 22:45:37,056 - Experiment - INFO - [Scheduler] epoch 168 lr:1.0000000000000002e-06
+2026-02-05 22:45:55,729 - Experiment - INFO - epoch 169 train_loss:14.236375334733975
+2026-02-05 22:45:59,266 - Experiment - INFO - [Validation] epoch 169 val_loss:12.959540765935724
+2026-02-05 22:45:59,266 - Experiment - INFO - [Scheduler] epoch 169 lr:1.0000000000000002e-06
+2026-02-05 22:46:17,929 - Experiment - INFO - epoch 170 train_loss:14.230221868275168
+2026-02-05 22:46:21,458 - Experiment - INFO - [Validation] epoch 170 val_loss:12.953329866582697
+2026-02-05 22:46:24,961 - Experiment - INFO - [Test][imputation] epoch 170 mae:[12.736604690551758] rmse:[20.103940963745117] mape:[0.08371235430240631]
+2026-02-05 22:46:24,961 - Experiment - INFO - [Scheduler] epoch 170 lr:1.0000000000000002e-06
+2026-02-05 22:46:43,621 - Experiment - INFO - epoch 171 train_loss:14.23241381730862
+2026-02-05 22:46:47,150 - Experiment - INFO - [Validation] epoch 171 val_loss:12.953636152094061
+2026-02-05 22:46:47,150 - Experiment - INFO - [Scheduler] epoch 171 lr:1.0000000000000002e-06
+2026-02-05 22:47:05,819 - Experiment - INFO - epoch 172 train_loss:14.230020494518167
+2026-02-05 22:47:09,363 - Experiment - INFO - [Validation] epoch 172 val_loss:12.95517630143599
+2026-02-05 22:47:09,363 - Experiment - INFO - [Scheduler] epoch 172 lr:1.0000000000000002e-06
+2026-02-05 22:47:28,047 - Experiment - INFO - epoch 173 train_loss:14.23219352996278
+2026-02-05 22:47:31,563 - Experiment - INFO - [Validation] epoch 173 val_loss:12.95879249572754
+2026-02-05 22:47:31,564 - Experiment - INFO - [Scheduler] epoch 173 lr:1.0000000000000002e-06
+2026-02-05 22:47:50,214 - Experiment - INFO - epoch 174 train_loss:14.224201704927546
+2026-02-05 22:47:53,765 - Experiment - INFO - [Validation] epoch 174 val_loss:12.952637030861595
+2026-02-05 22:47:53,766 - Experiment - INFO - [Scheduler] epoch 174 lr:1.0000000000000002e-06
+2026-02-05 22:48:12,442 - Experiment - INFO - epoch 175 train_loss:14.239065073207467
+2026-02-05 22:48:15,983 - Experiment - INFO - [Validation] epoch 175 val_loss:12.962702213634143
+2026-02-05 22:48:19,464 - Experiment - INFO - [Test][imputation] epoch 175 mae:[12.736820220947266] rmse:[20.104841232299805] mape:[0.08367500454187393]
+2026-02-05 22:48:19,464 - Experiment - INFO - [Scheduler] epoch 175 lr:1.0000000000000002e-06
+2026-02-05 22:48:38,135 - Experiment - INFO - epoch 176 train_loss:14.231976166456759
+2026-02-05 22:48:41,682 - Experiment - INFO - [Validation] epoch 176 val_loss:12.939951931346547
+2026-02-05 22:48:41,682 - Experiment - INFO - [Scheduler] epoch 176 lr:1.0000000000000002e-06
+2026-02-05 22:49:00,360 - Experiment - INFO - epoch 177 train_loss:14.235566356224927
+2026-02-05 22:49:03,890 - Experiment - INFO - [Validation] epoch 177 val_loss:12.963733360984108
+2026-02-05 22:49:03,890 - Experiment - INFO - [Scheduler] epoch 177 lr:1.0000000000000002e-06
+2026-02-05 22:49:22,559 - Experiment - INFO - epoch 178 train_loss:14.230727190029121
+2026-02-05 22:49:26,093 - Experiment - INFO - [Validation] epoch 178 val_loss:12.95178663080389
+2026-02-05 22:49:26,093 - Experiment - INFO - [Scheduler] epoch 178 lr:1.0000000000000002e-06
+2026-02-05 22:49:44,756 - Experiment - INFO - epoch 179 train_loss:14.237847819299756
+2026-02-05 22:49:48,298 - Experiment - INFO - [Validation] epoch 179 val_loss:12.960979895158248
+2026-02-05 22:49:48,298 - Experiment - INFO - [Scheduler] epoch 179 lr:1.0000000000000002e-06
+2026-02-05 22:50:06,956 - Experiment - INFO - epoch 180 train_loss:14.232240950989866
+2026-02-05 22:50:10,505 - Experiment - INFO - [Validation] epoch 180 val_loss:12.971246199174361
+2026-02-05 22:50:14,005 - Experiment - INFO - [Test][imputation] epoch 180 mae:[12.736763954162598] rmse:[20.104808807373047] mape:[0.08368504047393799]
+2026-02-05 22:50:14,006 - Experiment - INFO - [Scheduler] epoch 180 lr:1.0000000000000002e-06
+2026-02-05 22:50:32,673 - Experiment - INFO - epoch 181 train_loss:14.242344782024087
+2026-02-05 22:50:36,202 - Experiment - INFO - [Validation] epoch 181 val_loss:12.951231661709873
+2026-02-05 22:50:36,203 - Experiment - INFO - [Scheduler] epoch 181 lr:1.0000000000000002e-06
+2026-02-05 22:50:54,874 - Experiment - INFO - epoch 182 train_loss:14.226194764325719
+2026-02-05 22:50:58,397 - Experiment - INFO - [Validation] epoch 182 val_loss:12.9471942728216
+2026-02-05 22:50:58,397 - Experiment - INFO - [Scheduler] epoch 182 lr:1.0000000000000002e-06
+2026-02-05 22:51:17,070 - Experiment - INFO - epoch 183 train_loss:14.236703410120068
+2026-02-05 22:51:20,610 - Experiment - INFO - [Validation] epoch 183 val_loss:12.963097242875532
+2026-02-05 22:51:20,610 - Experiment - INFO - [Scheduler] epoch 183 lr:1.0000000000000002e-06
+2026-02-05 22:51:39,271 - Experiment - INFO - epoch 184 train_loss:14.220304095102641
+2026-02-05 22:51:42,799 - Experiment - INFO - [Validation] epoch 184 val_loss:12.966595302928578
+2026-02-05 22:51:42,799 - Experiment - INFO - [Scheduler] epoch 184 lr:1.0000000000000002e-06
+2026-02-05 22:52:01,482 - Experiment - INFO - epoch 185 train_loss:14.234251022338867
+2026-02-05 22:52:05,009 - Experiment - INFO - [Validation] epoch 185 val_loss:12.969150005687366
+2026-02-05 22:52:08,505 - Experiment - INFO - [Test][imputation] epoch 185 mae:[12.735594749450684] rmse:[20.10399627685547] mape:[0.08372516930103302]
+2026-02-05 22:52:08,505 - Experiment - INFO - [Scheduler] epoch 185 lr:1.0000000000000002e-06
+2026-02-05 22:52:27,157 - Experiment - INFO - epoch 186 train_loss:14.240552628111697
+2026-02-05 22:52:30,680 - Experiment - INFO - [Validation] epoch 186 val_loss:12.957169099287553
+2026-02-05 22:52:30,680 - Experiment - INFO - [Scheduler] epoch 186 lr:1.0000000000000002e-06
+2026-02-05 22:52:49,329 - Experiment - INFO - epoch 187 train_loss:14.233433883347198
+2026-02-05 22:52:52,865 - Experiment - INFO - [Validation] epoch 187 val_loss:12.963133950666947
+2026-02-05 22:52:52,865 - Experiment - INFO - [Scheduler] epoch 187 lr:1.0000000000000002e-06
+2026-02-05 22:53:11,526 - Experiment - INFO - epoch 188 train_loss:14.225428592659043
+2026-02-05 22:53:15,050 - Experiment - INFO - [Validation] epoch 188 val_loss:12.958521634882146
+2026-02-05 22:53:15,050 - Experiment - INFO - [Scheduler] epoch 188 lr:1.0000000000000002e-06
+2026-02-05 22:53:33,723 - Experiment - INFO - epoch 189 train_loss:14.22588932014511
+2026-02-05 22:53:37,245 - Experiment - INFO - [Validation] epoch 189 val_loss:12.96277921850031
+2026-02-05 22:53:37,245 - Experiment - INFO - [Scheduler] epoch 189 lr:1.0000000000000002e-06
+2026-02-05 22:53:55,894 - Experiment - INFO - epoch 190 train_loss:14.232666278313733
+2026-02-05 22:53:59,427 - Experiment - INFO - [Validation] epoch 190 val_loss:12.953438914905895
+2026-02-05 22:54:02,925 - Experiment - INFO - [Test][imputation] epoch 190 mae:[12.735053062438965] rmse:[20.103368759155273] mape:[0.08377069979906082]
+2026-02-05 22:54:02,926 - Experiment - INFO - [Scheduler] epoch 190 lr:1.0000000000000002e-06
+2026-02-05 22:54:21,590 - Experiment - INFO - epoch 191 train_loss:14.227831400797038
+2026-02-05 22:54:25,120 - Experiment - INFO - [Validation] epoch 191 val_loss:12.958530460704457
+2026-02-05 22:54:25,120 - Experiment - INFO - [Scheduler] epoch 191 lr:1.0000000000000002e-06
+2026-02-05 22:54:43,815 - Experiment - INFO - epoch 192 train_loss:14.227847864527902
+2026-02-05 22:54:47,358 - Experiment - INFO - [Validation] epoch 192 val_loss:12.961370953646574
+2026-02-05 22:54:47,358 - Experiment - INFO - [Scheduler] epoch 192 lr:1.0000000000000002e-06
+2026-02-05 22:55:06,011 - Experiment - INFO - epoch 193 train_loss:14.237967982263623
+2026-02-05 22:55:09,539 - Experiment - INFO - [Validation] epoch 193 val_loss:12.951733901283959
+2026-02-05 22:55:09,539 - Experiment - INFO - [Scheduler] epoch 193 lr:1.0000000000000002e-06
+2026-02-05 22:55:28,203 - Experiment - INFO - epoch 194 train_loss:14.23632552095516
+2026-02-05 22:55:31,737 - Experiment - INFO - [Validation] epoch 194 val_loss:12.960674840753729
+2026-02-05 22:55:31,737 - Experiment - INFO - [Scheduler] epoch 194 lr:1.0000000000000002e-06
+2026-02-05 22:55:50,405 - Experiment - INFO - epoch 195 train_loss:14.235186902348866
+2026-02-05 22:55:53,941 - Experiment - INFO - [Validation] epoch 195 val_loss:12.963897705078125
+2026-02-05 22:55:57,442 - Experiment - INFO - [Test][imputation] epoch 195 mae:[12.73585033416748] rmse:[20.1049747467041] mape:[0.08376585692167282]
+2026-02-05 22:55:57,442 - Experiment - INFO - [Scheduler] epoch 195 lr:1.0000000000000002e-06
+2026-02-05 22:56:16,103 - Experiment - INFO - epoch 196 train_loss:14.234337389826061
+2026-02-05 22:56:19,633 - Experiment - INFO - [Validation] epoch 196 val_loss:12.963490642200817
+2026-02-05 22:56:19,633 - Experiment - INFO - [Scheduler] epoch 196 lr:1.0000000000000002e-06
+2026-02-05 22:56:38,295 - Experiment - INFO - epoch 197 train_loss:14.23136531235929
+2026-02-05 22:56:41,845 - Experiment - INFO - [Validation] epoch 197 val_loss:12.949412415244362
+2026-02-05 22:56:41,845 - Experiment - INFO - [Scheduler] epoch 197 lr:1.0000000000000002e-06
+2026-02-05 22:57:00,492 - Experiment - INFO - epoch 198 train_loss:14.237204614513649
+2026-02-05 22:57:04,022 - Experiment - INFO - [Validation] epoch 198 val_loss:12.953095089305531
+2026-02-05 22:57:04,022 - Experiment - INFO - [Scheduler] epoch 198 lr:1.0000000000000002e-06
+2026-02-05 22:57:22,692 - Experiment - INFO - epoch 199 train_loss:14.233459364154381
+2026-02-05 22:57:26,221 - Experiment - INFO - [Validation] epoch 199 val_loss:12.963572051308372
+2026-02-05 22:57:26,221 - Experiment - INFO - [Scheduler] epoch 199 lr:1.0000000000000002e-06
+2026-02-05 22:57:44,887 - Experiment - INFO - epoch 200 train_loss:14.229693858209485
+2026-02-05 22:57:48,436 - Experiment - INFO - [Validation] epoch 200 val_loss:12.962307392467151
+2026-02-05 22:57:51,934 - Experiment - INFO - [Test][imputation] epoch 200 mae:[12.735809326171875] rmse:[20.104053497314453] mape:[0.0837009847164154]
+2026-02-05 22:57:51,934 - Experiment - INFO - [Scheduler] epoch 200 lr:1.0000000000000002e-06
+2026-02-05 22:58:10,640 - Experiment - INFO - epoch 201 train_loss:14.22365756234723
+2026-02-05 22:58:14,174 - Experiment - INFO - [Validation] epoch 201 val_loss:12.959651565551757
+2026-02-05 22:58:14,174 - Experiment - INFO - [Scheduler] epoch 201 lr:1.0000000000000002e-06
+2026-02-05 22:58:32,865 - Experiment - INFO - epoch 202 train_loss:14.224580045231802
+2026-02-05 22:58:36,382 - Experiment - INFO - [Validation] epoch 202 val_loss:12.9701697956432
+2026-02-05 22:58:36,382 - Experiment - INFO - [Scheduler] epoch 202 lr:1.0000000000000002e-06
+2026-02-05 22:58:55,038 - Experiment - INFO - epoch 203 train_loss:14.232145703481343
+2026-02-05 22:58:58,555 - Experiment - INFO - [Validation] epoch 203 val_loss:12.953158517317338
+2026-02-05 22:58:58,555 - Experiment - INFO - [Scheduler] epoch 203 lr:1.0000000000000002e-06
+2026-02-05 22:59:17,232 - Experiment - INFO - epoch 204 train_loss:14.225482700827593
+2026-02-05 22:59:20,769 - Experiment - INFO - [Validation] epoch 204 val_loss:12.960533246127042
+2026-02-05 22:59:20,769 - Experiment - INFO - [Scheduler] epoch 204 lr:1.0000000000000002e-06
+2026-02-05 22:59:39,428 - Experiment - INFO - epoch 205 train_loss:14.225748496141263
+2026-02-05 22:59:42,949 - Experiment - INFO - [Validation] epoch 205 val_loss:12.95021898096258
+2026-02-05 22:59:46,447 - Experiment - INFO - [Test][imputation] epoch 205 mae:[12.736114501953125] rmse:[20.104412078857422] mape:[0.08371186256408691]
+2026-02-05 22:59:46,448 - Experiment - INFO - [Scheduler] epoch 205 lr:1.0000000000000002e-06
+2026-02-05 23:00:05,097 - Experiment - INFO - epoch 206 train_loss:14.237743994433009
+2026-02-05 23:00:08,638 - Experiment - INFO - [Validation] epoch 206 val_loss:12.96241094415838
+2026-02-05 23:00:08,638 - Experiment - INFO - [Scheduler] epoch 206 lr:1.0000000000000002e-06
+2026-02-05 23:00:27,297 - Experiment - INFO - epoch 207 train_loss:14.231997695511687
+2026-02-05 23:00:30,824 - Experiment - INFO - [Validation] epoch 207 val_loss:12.959836595708675
+2026-02-05 23:00:30,824 - Experiment - INFO - [Scheduler] epoch 207 lr:1.0000000000000002e-06
+2026-02-05 23:00:49,493 - Experiment - INFO - epoch 208 train_loss:14.231603194139675
+2026-02-05 23:00:53,028 - Experiment - INFO - [Validation] epoch 208 val_loss:12.969273567199707
+2026-02-05 23:00:53,028 - Experiment - INFO - [Scheduler] epoch 208 lr:1.0000000000000002e-06
+2026-02-05 23:01:11,718 - Experiment - INFO - epoch 209 train_loss:14.226461798844937
+2026-02-05 23:01:15,261 - Experiment - INFO - [Validation] epoch 209 val_loss:12.95491535880349
+2026-02-05 23:01:15,261 - Experiment - INFO - [Scheduler] epoch 209 lr:1.0000000000000002e-06
+2026-02-05 23:01:33,915 - Experiment - INFO - epoch 210 train_loss:14.234784491761715
+2026-02-05 23:01:37,444 - Experiment - INFO - [Validation] epoch 210 val_loss:12.968921383944425
+2026-02-05 23:01:40,951 - Experiment - INFO - [Test][imputation] epoch 210 mae:[12.735745429992676] rmse:[20.103919982910156] mape:[0.08370726555585861]
+2026-02-05 23:01:40,951 - Experiment - INFO - [Scheduler] epoch 210 lr:1.0000000000000002e-06
+2026-02-05 23:01:59,609 - Experiment - INFO - epoch 211 train_loss:14.23154565388571
+2026-02-05 23:02:03,131 - Experiment - INFO - [Validation] epoch 211 val_loss:12.96308352730491
+2026-02-05 23:02:03,132 - Experiment - INFO - [Scheduler] epoch 211 lr:1.0000000000000002e-06
+2026-02-05 23:02:21,833 - Experiment - INFO - epoch 212 train_loss:14.222807844241936
+2026-02-05 23:02:25,355 - Experiment - INFO - [Validation] epoch 212 val_loss:12.966571686484597
+2026-02-05 23:02:25,355 - Experiment - INFO - [Scheduler] epoch 212 lr:1.0000000000000002e-06
+2026-02-05 23:02:44,006 - Experiment - INFO - epoch 213 train_loss:14.230402592413439
+2026-02-05 23:02:47,541 - Experiment - INFO - [Validation] epoch 213 val_loss:12.960318166559393
+2026-02-05 23:02:47,541 - Experiment - INFO - [Scheduler] epoch 213 lr:1.0000000000000002e-06
+2026-02-05 23:03:06,200 - Experiment - INFO - epoch 214 train_loss:14.239007709982866
+2026-02-05 23:03:09,724 - Experiment - INFO - [Validation] epoch 214 val_loss:12.957710786299272
+2026-02-05 23:03:09,724 - Experiment - INFO - [Scheduler] epoch 214 lr:1.0000000000000002e-06
+2026-02-05 23:03:28,397 - Experiment - INFO - epoch 215 train_loss:14.232564988964333
+2026-02-05 23:03:31,928 - Experiment - INFO - [Validation] epoch 215 val_loss:12.959923328052868
+2026-02-05 23:03:35,421 - Experiment - INFO - [Test][imputation] epoch 215 mae:[12.734095573425293] rmse:[20.101903915405273] mape:[0.08370890468358994]
+2026-02-05 23:03:35,421 - Experiment - INFO - [Scheduler] epoch 215 lr:1.0000000000000002e-06
+2026-02-05 23:03:54,092 - Experiment - INFO - epoch 216 train_loss:14.234194384363597
+2026-02-05 23:03:57,633 - Experiment - INFO - [Validation] epoch 216 val_loss:12.961806418678977
+2026-02-05 23:03:57,633 - Experiment - INFO - [Scheduler] epoch 216 lr:1.0000000000000002e-06
+2026-02-05 23:04:16,294 - Experiment - INFO - epoch 217 train_loss:14.219790738499807
+2026-02-05 23:04:19,823 - Experiment - INFO - [Validation] epoch 217 val_loss:12.953397924249822
+2026-02-05 23:04:19,823 - Experiment - INFO - [Scheduler] epoch 217 lr:1.0000000000000002e-06
+2026-02-05 23:04:38,491 - Experiment - INFO - epoch 218 train_loss:14.237129028685793
+2026-02-05 23:04:42,025 - Experiment - INFO - [Validation] epoch 218 val_loss:12.953195901350542
+2026-02-05 23:04:42,025 - Experiment - INFO - [Scheduler] epoch 218 lr:1.0000000000000002e-06
+2026-02-05 23:05:00,717 - Experiment - INFO - epoch 219 train_loss:14.229756395260017
+2026-02-05 23:05:04,252 - Experiment - INFO - [Validation] epoch 219 val_loss:12.963230115717108
+2026-02-05 23:05:04,252 - Experiment - INFO - [Scheduler] epoch 219 lr:1.0000000000000002e-06
+2026-02-05 23:05:22,915 - Experiment - INFO - epoch 220 train_loss:14.223323627860246
+2026-02-05 23:05:26,440 - Experiment - INFO - [Validation] epoch 220 val_loss:12.96089337088845
+2026-02-05 23:05:29,939 - Experiment - INFO - [Test][imputation] epoch 220 mae:[12.735945701599121] rmse:[20.104679107666016] mape:[0.08369563519954681]
+2026-02-05 23:05:29,939 - Experiment - INFO - [Scheduler] epoch 220 lr:1.0000000000000002e-06
+2026-02-05 23:05:48,607 - Experiment - INFO - epoch 221 train_loss:14.226590550588277
+2026-02-05 23:05:52,125 - Experiment - INFO - [Validation] epoch 221 val_loss:12.964194644581188
+2026-02-05 23:05:52,125 - Experiment - INFO - [Scheduler] epoch 221 lr:1.0000000000000002e-06
+2026-02-05 23:06:10,779 - Experiment - INFO - epoch 222 train_loss:14.223029028155846
+2026-02-05 23:06:14,311 - Experiment - INFO - [Validation] epoch 222 val_loss:12.952697563171387
+2026-02-05 23:06:14,311 - Experiment - INFO - [Scheduler] epoch 222 lr:1.0000000000000002e-06
+2026-02-05 23:06:32,975 - Experiment - INFO - epoch 223 train_loss:14.232926968328966
+2026-02-05 23:06:36,498 - Experiment - INFO - [Validation] epoch 223 val_loss:12.964765184575862
+2026-02-05 23:06:36,498 - Experiment - INFO - [Scheduler] epoch 223 lr:1.0000000000000002e-06
+2026-02-05 23:06:55,169 - Experiment - INFO - epoch 224 train_loss:14.2313423556482
+2026-02-05 23:06:58,703 - Experiment - INFO - [Validation] epoch 224 val_loss:12.964296288923784
+2026-02-05 23:06:58,703 - Experiment - INFO - [Scheduler] epoch 224 lr:1.0000000000000002e-06
+2026-02-05 23:07:17,369 - Experiment - INFO - epoch 225 train_loss:14.22553573539871
+2026-02-05 23:07:20,888 - Experiment - INFO - [Validation] epoch 225 val_loss:12.963831728154963
+2026-02-05 23:07:24,375 - Experiment - INFO - [Test][imputation] epoch 225 mae:[12.734920501708984] rmse:[20.10283088684082] mape:[0.08370229601860046]
+2026-02-05 23:07:24,375 - Experiment - INFO - [Scheduler] epoch 225 lr:1.0000000000000002e-06
+2026-02-05 23:07:43,037 - Experiment - INFO - epoch 226 train_loss:14.225396167732285
+2026-02-05 23:07:46,566 - Experiment - INFO - [Validation] epoch 226 val_loss:12.959507976878774
+2026-02-05 23:07:46,566 - Experiment - INFO - [Scheduler] epoch 226 lr:1.0000000000000002e-06
+2026-02-05 23:07:46,566 - Experiment - INFO - early stop
+2026-02-05 23:07:50,067 - Experiment - INFO - [Test][imputation] best model mae:[12.736672401428223] rmse:[20.10565185546875] mape:[0.08378591388463974]
