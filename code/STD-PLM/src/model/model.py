@@ -7,6 +7,7 @@ from model.sandglassAttn import SAG
 import numpy as np
 from model.position import PositionalEncoding
 from model.basic import PromptPoolPrefix
+import math
 
 
 class DecodingLayer(nn.Module):
@@ -54,6 +55,58 @@ class TimeEmbedding(nn.Module):
         te = torch.concat((DE,WE),dim=-1).view(B,T,-1)
 
         return te
+
+
+
+class TimeEmbeddingFFT(nn.Module):
+    """
+    Replace discrete lookup embeddings (288/7) with Fourier features:
+      - time-of-day: period P_day=288 (5-min bins)
+      - day-of-week: period P_week=7
+    Output shape keeps the same pattern as original (concat):
+      te = concat(DE, WE) -> (B, T, 2*t_dim)
+    """
+    def __init__(self, t_dim: int, K_day: int = 8, K_week: int = 3, P_day: int = 288):
+        super().__init__()
+        self.t_dim = t_dim
+        self.K_day = K_day
+        self.K_week = K_week
+        self.P_day = P_day
+
+        # Project Fourier features -> t_dim (so DE and WE each are t_dim, then concat)
+        self.proj_day = nn.Linear(2 * K_day, t_dim)
+        self.proj_week = nn.Linear(2 * K_week, t_dim)
+
+    @staticmethod
+    def _fourier_features(idx: torch.Tensor, K: int, P: int) -> torch.Tensor:
+        """
+        idx: (N, 1) float or long -> treat as time index in [0, P-1]
+        return: (N, 2K) with [sin(2πk idx/P), cos(2πk idx/P)] for k=1..K
+        """
+        x = idx.float()  # (N,1)
+        ks = torch.arange(1, K + 1, device=idx.device, dtype=torch.float32).view(1, -1)  # (1,K)
+        ang = 2.0 * math.pi * x * ks / float(P)  # (N,K)
+        return torch.cat([torch.sin(ang), torch.cos(ang)], dim=-1)  # (N,2K)
+
+    def forward(self, TE: torch.Tensor) -> torch.Tensor:
+        # TE: (B,T,5) where TE[...,2]=weekday, TE[...,3]=hour, TE[...,4]=minute
+        B, T, _ = TE.shape
+
+        week = (TE[..., 2].long() % 7).view(B * T, 1)        # 0..6
+        hour = (TE[..., 3].long() % 24).view(B * T, 1)       # 0..23
+        minute = (TE[..., 4].long() % 60).view(B * T, 1)     # 0..59
+
+        tod = ((hour * 60 + minute) // 5).clamp(0, self.P_day - 1)  # (B*T,1) 0..287
+
+        day_feat = self._fourier_features(tod, self.K_day, self.P_day)    # (B*T, 2K_day)
+        week_feat = self._fourier_features(week, self.K_week, 7)          # (B*T, 2K_week)
+
+        DE = self.proj_day(day_feat)    # (B*T, t_dim)
+        WE = self.proj_week(week_feat)  # (B*T, t_dim)
+
+        te = torch.cat([DE, WE], dim=-1).view(B, T, -1)  # (B,T,2*t_dim)
+        return te
+
 
 
 class NodeEmbedding(nn.Module):
@@ -499,7 +552,7 @@ class STALLM(nn.Module):
                 prompt_len, _ = prompt_prefix.shape
                 prompt_embedding = self.basemodel.getembedding(prompt_prefix).view(1, prompt_len, -1)
                 prompt_embedding = prompt_embedding.repeat(B, 1, 1)
-                # prompt_embedding = self.prompt_proj(prompt_embedding)
+                # prompt_embedding = self.prompt_proj(prompt_embedding)  #開了沒比較好
                 st_embedding = torch.cat([prompt_embedding, st_embedding], dim=1)
 
         # -------------------------

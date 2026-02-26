@@ -29,7 +29,6 @@ python main.py \
     --task imputation \
     --trainset_dynamic_missing \
     --target_strategy 'hybrid' \
-    --sandglassAttn \
     --sag_dim 128 \
     --sag_tokens 128 \
     --input_dim 1\

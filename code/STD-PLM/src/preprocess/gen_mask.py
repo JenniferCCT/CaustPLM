@@ -2,8 +2,8 @@ import os
 import numpy as np
 
 # ===== 你只需要改這裡 =====
-true_path = "../../../../data/traffic/miss_data/PEMS08/true_data_SR-TR_0.9_v1.npz"
-miss_path = "../../../../data/traffic/miss_data/PEMS08/miss_data_SR-TR_0.9_v1.npz"
+true_path = "../../../../data/traffic/miss_data/PEMS03/true_data_SR-TR_0.9_v1.npz"
+miss_path = "../../../../data/traffic/miss_data/PEMS03/miss_data_SR-TR_0.9_v1.npz"
 missing_ratio = 0.9
 seed = 2024
 # ==========================
