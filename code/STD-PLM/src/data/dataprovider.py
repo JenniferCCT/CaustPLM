@@ -231,8 +231,12 @@ class PEMSMISSINGProvider(DataProvider):
         data = torch.from_numpy(data)
 
         T, node_num, features = data.shape
+        if 'PEMS03' in self.dataset:
+            id_filename = adj_path.replace('csv','txt')
+        else :
+            id_filename = None
  
-        adj_mx, distance_mx = get_adjacency_matrix(adj_path, node_num)
+        adj_mx, distance_mx = get_adjacency_matrix(adj_path, node_num,id_filename)
         adj_mx = np.where(np.eye(node_num).astype('bool'),1,adj_mx)
 
         timestamp = timestampfun[self.dataset[:6]](T)
