@@ -83,6 +83,8 @@ def TestEpoch(loader, model,  prompt_prefix, scaler, save=False):
         targets = []
         predicts = []
         eval_masks = []
+        seen_samples = 0
+        case_saved = False
 
         for input, target, timestamp,cond_mask,ob_mask in loader:
             B,T,N,F = input.shape
@@ -91,8 +93,32 @@ def TestEpoch(loader, model,  prompt_prefix, scaler, save=False):
             input = torch.where(cond_mask==0,0,input)
             input = input.permute(0,2,1,3).contiguous().view(B,N,-1)
 
-
+            model.capture_sca_case = args.save_sca_case
             predict,_ = model(input,timestamp,prompt_prefix,cond_mask)
+            batch_size = input.shape[0]
+            case_in_batch = args.case_sample_idx - seen_samples
+            should_save_case = (
+                args.save_sca_case
+                and not case_saved
+                and 0 <= case_in_batch < batch_size
+            )
+            if should_save_case:
+                case_dir = os.path.join(LOG_DIR, "case_study")
+                check_dir(case_dir, mkdir=True)
+            if should_save_case:
+                case_data = model.latest_sca_case
+                np.savez(
+                    os.path.join(case_dir, f"sample_{args.case_sample_idx:04d}.npz"),
+                    beta=case_data["beta"][case_in_batch].numpy(),
+                    spatial_tokens_before=case_data["spatial_tokens_before"]
+                    [case_in_batch].numpy(),
+                    spatial_tokens_after=case_data["spatial_tokens_after"][case_in_batch].numpy(),          prediction=predict[case_in_batch].detach().cpu().numpy(),
+                    ground_truth=target[case_in_batch].detach().cpu().numpy(),
+                    mask=ob_mask[case_in_batch].detach().cpu().numpy(),
+                    sensor_index=np.arange(N),
+                    sample_id=args.case_sample_idx,
+                )
+                case_saved = True
 
             predict = predict.view(B,N,-1,args.output_dim).permute(0,2,1,3).contiguous()
 
@@ -105,6 +131,8 @@ def TestEpoch(loader, model,  prompt_prefix, scaler, save=False):
             targets.append(target.detach())
             predicts.append(predict.detach())
             eval_masks.append(eval_mask.detach())
+            seen_samples += batch_size
+            model.capture_sca_case = False
 
         targets = torch.concat(targets,dim = 0)
         predicts = torch.concat(predicts,dim = 0)
@@ -322,7 +350,7 @@ if __name__ == '__main__':
                      adj_mx = adj_mx, dis_mx = distance_mx, \
                     use_node_embedding = args.node_embedding ,use_timetoken= args.time_token, \
                     use_sandglassAttn = args.sandglassAttn, dropout = args.dropout, trunc_k = args.trunc_k, t_dim = args.t_dim,wo_conloss=args.wo_conloss, \
-                    prompt_pool=args.prompt_pool, cross_attn=args.cross_attn).cuda()
+                    prompt_pool=args.prompt_pool, cross_attn=args.cross_attn, gate_lambda=args.gate_lambda, sca_eps=args.sca_eps).cuda()
     
     if not args.from_pretrained_model is None:
         model.load(args.from_pretrained_model)

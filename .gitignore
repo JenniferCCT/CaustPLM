@@ -1,0 +1,30 @@
+# Logs
+code/STD-PLM/logs/
+*.log
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environment
+venv/
+.venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.bak
+
+# Experiment outputs
+checkpoints/
+outputs/
+results/

@@ -35,6 +35,8 @@ def AddModelArgs(parser):
     parser.add_argument("--wo_conloss" , action="store_true")
     parser.add_argument("--sag_dim", default=128, type=int)
     parser.add_argument("--sag_tokens", default=128, type=int)
+    parser.add_argument("--gate_lambda", default=1e-3, type=float)
+    parser.add_argument("--sca_eps",default=0.2, type=float)
 
 
 def AddDataArgs(parser):
@@ -96,6 +98,9 @@ def InitArgs():
     parser.add_argument("--nni" , action="store_true")
 
     parser.add_argument("--save_result" , action="store_true")
+
+    parser.add_argument("--save_sca_case", action="store_true")
+    parser.add_argument("--case_sample_idx", default=0, type=int)
 
     parser.add_argument("--few_shot" , default=1, type=float)
 

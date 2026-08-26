@@ -276,7 +276,7 @@ class STALLM(nn.Module):
                  use_timetoken = True, use_sandglassAttn = True, \
                  dropout = 0, trunc_k = 16, t_dim = 64,wo_conloss=False,\
                  prompt_pool: bool = False,pool_size: int = 30,top_k: int = 3, \
-                 prompt_len: int = 5,prompt_sim_lambda: float = 1e-3,cross_attn:bool = False):
+                 prompt_len: int = 5,prompt_sim_lambda: float = 1e-3,cross_attn:bool = False,  gate_lambda: float = 1e-3, sca_eps: float = 0.2):
         super().__init__()
 
         self.topological_sort_node = True
@@ -319,9 +319,11 @@ class STALLM(nn.Module):
         self.prompt_proj = nn.Sequential(nn.Linear(self.emb_dim, self.emb_dim))
 
         self.use_sca_lite = True
-        self.sca_eps = 0.2
-        self.gate_lambda = 1e-3   # 可選：讓 gate 稍微稀疏
+        self.sca_eps = sca_eps
+        self.gate_lambda = gate_lambda   # 可選：讓 gate 稍微稀疏
         self.sca_lite_gate = SCALiteQueryGate(self.emb_dim, hidden_mult=0.5)
+        self.capture_sca_case = False
+        self.latest_sca_case = None
 
         self.use_sandglassAttn = use_sandglassAttn
         if use_sandglassAttn:
@@ -461,9 +463,16 @@ class STALLM(nn.Module):
             # query 可以用「目前所有 node token 的平均」：全局狀態摘要
             q = spatial_tokens.mean(dim=1)  # (B, D)
 
+            spatial_tokens_before_sca = spatial_tokens 
             beta = self.sca_lite_gate(spatial_tokens, q)         # (B, N, 1)
             spatial_tokens = self.apply_residual_gate(spatial_tokens, beta, eps=self.sca_eps)
 
+            if getattr(self, "capture_sca_case", False):
+                self.latest_sca_case = {
+                    "beta": beta.detach().cpu(),
+                    "spatial_tokens_before": spatial_tokens_before_sca.detach().cpu(),
+                    "spatial_tokens_after": spatial_tokens.detach().cpu(),
+            }
             # (Optional) sparsity regularization: encourage smaller beta (sparser influence)
             if getattr(self, "gate_lambda", 0.0) > 0:
                 other_loss.append(self.gate_lambda * beta.mean())
