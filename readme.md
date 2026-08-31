@@ -5,18 +5,9 @@
 ```bash
 cd ./code/STD-PLM/src
 
-#prediction
-bash '../scripts/pems03.sh'
-
 #imputation
 bash '../scripts/pems08_sctc30.sh'
 
-#zero-shot
-bash '../scripts/pems03<-PEMS07.sh'
-
-#few-shot
-bash '../scripts/pems04_few.sh'
-```
 
 ### Arguments
 
