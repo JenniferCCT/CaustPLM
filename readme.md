@@ -6,8 +6,12 @@
 cd ./code/STD-PLM/src
 
 #imputation
-bash '../scripts/pems08_sctc30.sh'
+bash '../scripts/pems08_srtr30.sh'
 
+run.sh can run all datasets for 30,50,70 and 90 missig rate.
+
+###paper
+full paper pdf is in the folder named 'paper'.
 
 ### Arguments
 
